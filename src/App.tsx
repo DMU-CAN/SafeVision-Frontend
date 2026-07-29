@@ -65,7 +65,7 @@ function App() {
   const loadEvents = useCallback((showLoading: boolean) => {
     if (showLoading) setEventsLoading(true)
     setEventsError(null)
-    return api.get<SafetyEventRaw[]>('/safety-events?limit=50')
+    return api.get<SafetyEventRaw[]>('/safety-events?limit=200')
       .then(setSafetyEvents)
       .catch(() => setEventsError('이벤트 목록을 불러오지 못했습니다.'))
       .finally(() => setEventsLoading(false))
@@ -214,7 +214,7 @@ function App() {
       ) : isAnalysisPage ? (
         <AiAnalysisPage cameras={cameras} events={safetyEvents} loading={eventsLoading} error={eventsError} onPlayClip={setActiveClipUrl} />
       ) : isStatisticsPage ? (
-        <StatisticsPage />
+        <StatisticsPage cameras={cameras} events={safetyEvents} loading={eventsLoading} error={eventsError} />
       ) : (
         <main className="page-placeholder">
           <span className="page-placeholder__eyebrow">SAFE-VISION CONTROL CENTER</span>
