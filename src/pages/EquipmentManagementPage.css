@@ -1,23 +1,23 @@
-.camera-management {
+.equipment-management {
   flex: 1;
   padding: 24px 32px;
   overflow-y: auto;
 }
 
-.camera-management__eyebrow {
+.equipment-management__eyebrow {
   color: var(--accent-blue);
   font-size: 11px;
   font-weight: bold;
   letter-spacing: 0.1em;
 }
 
-.camera-management h1 {
+.equipment-management h1 {
   margin: 8px 0 20px;
   color: var(--text-header);
   font-size: 24px;
 }
 
-.camera-management__panel {
+.equipment-management__panel {
   margin-bottom: 24px;
   padding: 16px;
   background: var(--panel);
@@ -25,20 +25,20 @@
   border-radius: 6px;
 }
 
-.camera-management__panel h2 {
+.equipment-management__panel h2 {
   margin: 0 0 12px;
   color: var(--text-header);
   font-size: 14px;
 }
 
-.camera-management__form {
+.equipment-management__form {
   display: flex;
   gap: 12px;
   align-items: flex-end;
   flex-wrap: wrap;
 }
 
-.camera-management__form label {
+.equipment-management__form label {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -48,7 +48,7 @@
   min-width: 160px;
 }
 
-.camera-management__form input {
+.equipment-management__form input {
   height: 32px;
   padding: 0 10px;
   background: var(--bg);
@@ -58,7 +58,7 @@
   font-size: 13px;
 }
 
-.camera-management__form button {
+.equipment-management__form button {
   height: 32px;
   padding: 0 16px;
   border: none;
@@ -70,43 +70,43 @@
   cursor: pointer;
 }
 
-.camera-management__form button:disabled {
+.equipment-management__form button:disabled {
   opacity: 0.6;
   cursor: default;
 }
 
-.camera-management__error {
+.equipment-management__error {
   margin: 10px 0 0;
   color: var(--danger-red);
   font-size: 12px;
 }
 
-.camera-management__hint {
+.equipment-management__hint {
   margin: 0;
   color: var(--text-muted);
   font-size: 12px;
 }
 
-.camera-management__table {
+.equipment-management__table {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
 }
 
-.camera-management__table th {
+.equipment-management__table th {
   text-align: left;
   padding: 8px;
   color: var(--text-muted);
   border-bottom: 1px solid var(--border);
 }
 
-.camera-management__table td {
+.equipment-management__table td {
   padding: 8px;
   color: var(--text-main);
   border-bottom: 1px solid var(--border);
 }
 
-.camera-management__url {
+.equipment-management__url {
   color: var(--text-muted);
   max-width: 260px;
   overflow: hidden;
@@ -114,7 +114,7 @@
   white-space: nowrap;
 }
 
-.camera-management__delete {
+.equipment-management__delete {
   height: 26px;
   padding: 0 10px;
   border: 1px solid var(--danger-red);

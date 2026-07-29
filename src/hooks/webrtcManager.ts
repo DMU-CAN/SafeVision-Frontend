@@ -2,6 +2,16 @@ import { api } from '../api/client'
 
 export type WebRTCStatus = 'connecting' | 'connected' | 'error'
 
+export type StreamTarget =
+  | { kind: 'camera'; cameraId: number; yoloEnabled?: boolean }
+  | { kind: 'robot'; robotId: number }
+
+export function streamTargetKey(target: StreamTarget): string {
+  return target.kind === 'camera'
+    ? `camera:${target.cameraId}:${target.yoloEnabled === false ? 'raw' : 'yolo'}`
+    : `robot:${target.robotId}`
+}
+
 interface Connection {
   pc: RTCPeerConnection
   stream: MediaStream | null
@@ -10,13 +20,13 @@ interface Connection {
   listeners: Set<() => void>
 }
 
-const connections = new Map<number, Connection>()
+const connections = new Map<string, Connection>()
 
 function notify(conn: Connection) {
   conn.listeners.forEach((listener) => listener())
 }
 
-async function connect(cameraId: number, conn: Connection) {
+async function connect(target: StreamTarget, conn: Connection) {
   conn.pc.addTransceiver('video', { direction: 'recvonly' })
   conn.pc.ontrack = (event) => {
     conn.stream = event.streams[0] ?? null
@@ -33,7 +43,7 @@ async function connect(cameraId: number, conn: Connection) {
     const offer = await conn.pc.createOffer()
     await conn.pc.setLocalDescription(offer)
     if (!offer.sdp) throw new Error('offer sdp missing')
-    const answer = await api.webrtcOffer(offer.sdp, cameraId)
+    const answer = await api.webrtcOffer(offer.sdp, target)
     conn.sessionId = answer.sessionId
     await conn.pc.setRemoteDescription({ sdp: answer.sdp, type: 'answer' })
     conn.status = 'connected'
@@ -44,28 +54,35 @@ async function connect(cameraId: number, conn: Connection) {
   }
 }
 
-/** Returns the shared connection for a camera, creating (and connecting) it
- * on first access. The connection is intentionally NOT tied to any component's
- * lifecycle — it stays open across screen/tab switches so cameras don't
- * reconnect every time the view changes. Use closeConnection/closeAllConnections
- * to explicitly tear one down (camera deleted, logout, etc). */
-export function getConnection(cameraId: number): Connection {
-  const existing = connections.get(cameraId)
+/** Returns the shared connection for a stream target (camera, optionally
+ * without YOLO overlay, or a robot's onboard camera), creating (and
+ * connecting) it on first access. The connection is intentionally NOT tied
+ * to any component's lifecycle — it stays open across screen/tab switches
+ * so streams don't reconnect every time the view changes. Use
+ * closeConnection/closeAllConnections to explicitly tear one down. */
+export function getConnection(target: StreamTarget): Connection {
+  const key = streamTargetKey(target)
+  const existing = connections.get(key)
   if (existing) return existing
   const conn: Connection = { pc: new RTCPeerConnection(), stream: null, status: 'connecting', listeners: new Set() }
-  connections.set(cameraId, conn)
-  connect(cameraId, conn)
+  connections.set(key, conn)
+  connect(target, conn)
   return conn
 }
 
-export function closeConnection(cameraId: number) {
-  const conn = connections.get(cameraId)
+export function closeConnection(target: StreamTarget) {
+  const key = streamTargetKey(target)
+  const conn = connections.get(key)
   if (!conn) return
   conn.pc.close()
   if (conn.sessionId) api.delete(`/webrtc/sessions/${conn.sessionId}`).catch(() => undefined)
-  connections.delete(cameraId)
+  connections.delete(key)
 }
 
 export function closeAllConnections() {
-  for (const cameraId of connections.keys()) closeConnection(cameraId)
+  for (const conn of connections.values()) {
+    conn.pc.close()
+    if (conn.sessionId) api.delete(`/webrtc/sessions/${conn.sessionId}`).catch(() => undefined)
+  }
+  connections.clear()
 }

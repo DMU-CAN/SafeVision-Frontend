@@ -9,11 +9,12 @@ import { RecordingSearchPage } from './pages/RecordingSearchPage'
 import { AiAnalysisPage } from './pages/AiAnalysisPage'
 import { StatisticsPage } from './pages/StatisticsPage'
 import { LoginPage } from './pages/LoginPage'
-import { CameraManagementPage } from './pages/CameraManagementPage'
+import { EquipmentManagementPage } from './pages/EquipmentManagementPage'
 import { ZoneSettingsPage } from './pages/ZoneSettingsPage'
+import { FieldRobotPage } from './pages/FieldRobotPage'
 import './App.css'
 import { api, getStoredUser, isAuthenticated, UNAUTHORIZED_EVENT } from './api/client'
-import type { Camera, SafetyEventRaw, Zone, ZonePoint } from './types'
+import type { Camera, Robot, SafetyEventRaw, Zone, ZonePoint } from './types'
 import { ControlPanel } from './components/control/ControlPanel'
 import { closeAllConnections, closeConnection } from './hooks/webrtcManager'
 import { mapSafetyEvent } from './utils/events'
@@ -35,6 +36,9 @@ function App() {
   const [cameras, setCameras] = useState<Camera[]>([])
   const [camerasLoading, setCamerasLoading] = useState(true)
   const [camerasError, setCamerasError] = useState<string | null>(null)
+  const [robots, setRobots] = useState<Robot[]>([])
+  const [robotsLoading, setRobotsLoading] = useState(true)
+  const [robotsError, setRobotsError] = useState<string | null>(null)
   const [safetyEvents, setSafetyEvents] = useState<SafetyEventRaw[]>([])
   const [eventsLoading, setEventsLoading] = useState(true)
   const [eventsError, setEventsError] = useState<string | null>(null)
@@ -60,6 +64,15 @@ function App() {
       })
       .catch(() => setCamerasError('카메라 목록을 불러오지 못했습니다.'))
       .finally(() => setCamerasLoading(false))
+  }, [])
+
+  const loadRobots = useCallback(() => {
+    setRobotsLoading(true)
+    setRobotsError(null)
+    return api.get<{ items: Robot[] }>('/robots')
+      .then((data) => setRobots(data.items))
+      .catch(() => setRobotsError('로봇 목록을 불러오지 못했습니다.'))
+      .finally(() => setRobotsLoading(false))
   }, [])
 
   const loadEvents = useCallback((showLoading: boolean) => {
@@ -89,7 +102,8 @@ function App() {
   useEffect(() => {
     if (!authed) return
     loadCameras()
-  }, [authed, loadCameras])
+    loadRobots()
+  }, [authed, loadCameras, loadRobots])
 
   useEffect(() => {
     if (!authed) return
@@ -112,9 +126,14 @@ function App() {
   const user = getStoredUser()
   const handleLogout = () => { closeAllConnections(); api.logout().finally(() => setAuthed(false)) }
 
-  const handleRegisterCamera = async (payload: { name: string; rtspUrl: string; location: string }) => {
+  const handleRegisterCamera = async (payload: { name: string; rtspUrl: string; location: string; locationX?: number; locationY?: number }) => {
     await api.post('/cameras', payload)
     await loadCameras()
+  }
+
+  const handleRegisterRobot = async (payload: { name: string; controlAddress: string; cameraRtspUrl: string; locationX?: number; locationY?: number }) => {
+    await api.post('/robots', payload)
+    await loadRobots()
   }
 
   const handleSaveZone = (name: string) => {
@@ -137,20 +156,30 @@ function App() {
   const handleDeleteCamera = (cameraId: number | string) => {
     api.delete(`/cameras/${cameraId}`)
       .then(() => {
-        if (typeof cameraId === 'number') closeConnection(cameraId)
+        if (typeof cameraId === 'number') closeConnection({ kind: 'camera', cameraId })
         return loadCameras()
       })
       .catch(() => setCamerasError('카메라 삭제에 실패했습니다.'))
   }
 
+  const handleDeleteRobot = (robotId: number) => {
+    api.delete(`/robots/${robotId}`)
+      .then(() => {
+        closeConnection({ kind: 'robot', robotId })
+        return loadRobots()
+      })
+      .catch(() => setRobotsError('로봇 삭제에 실패했습니다.'))
+  }
+
   const mappedEvents = safetyEvents.map((event) => mapSafetyEvent(event, cameras))
 
   const isMonitorPage = activeTab === navTabs[0]
-  const isCameraManagementPage = activeTab === navTabs[1]
+  const isEquipmentManagementPage = activeTab === navTabs[1]
   const isZoneSettingsPage = activeTab === navTabs[2]
-  const isRecordingPage = activeTab === navTabs[3]
-  const isAnalysisPage = activeTab === navTabs[4]
-  const isStatisticsPage = activeTab === navTabs[5]
+  const isFieldRobotPage = activeTab === navTabs[3]
+  const isRecordingPage = activeTab === navTabs[4]
+  const isAnalysisPage = activeTab === navTabs[5]
+  const isStatisticsPage = activeTab === navTabs[6]
 
   return (
     <div className="app-shell">
@@ -183,13 +212,18 @@ function App() {
           <ControlPanel />
         </>
 
-      ) : isCameraManagementPage ? (
-        <CameraManagementPage
+      ) : isEquipmentManagementPage ? (
+        <EquipmentManagementPage
           cameras={cameras}
-          loading={camerasLoading}
-          error={camerasError}
+          camerasLoading={camerasLoading}
+          camerasError={camerasError}
           onRegisterCamera={handleRegisterCamera}
           onDeleteCamera={handleDeleteCamera}
+          robots={robots}
+          robotsLoading={robotsLoading}
+          robotsError={robotsError}
+          onRegisterRobot={handleRegisterRobot}
+          onDeleteRobot={handleDeleteRobot}
         />
       ) : isZoneSettingsPage ? (
         <ZoneSettingsPage
@@ -209,6 +243,8 @@ function App() {
           onSaveZone={handleSaveZone}
           onDeleteZone={handleDeleteZone}
         />
+      ) : isFieldRobotPage ? (
+        <FieldRobotPage robots={robots} robotsLoading={robotsLoading} cameras={cameras} events={safetyEvents} />
       ) : isRecordingPage ? (
         <RecordingSearchPage cameras={cameras} events={safetyEvents} loading={eventsLoading} error={eventsError} onPlayClip={setActiveClipUrl} />
       ) : isAnalysisPage ? (

@@ -1,4 +1,5 @@
 import type { User } from '../types'
+import type { StreamTarget } from '../hooks/webrtcManager'
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api/v1'
 export const UNAUTHORIZED_EVENT = 'sv:unauthorized'
@@ -84,8 +85,13 @@ export const api = {
       clearAuth()
     }
   },
-  webrtcOffer: (sdp: string, cameraId: number) =>
+  webrtcOffer: (sdp: string, target: StreamTarget) =>
     request<{ sdp: string; type: string; sessionId: string }>('/webrtc/offer', {
-      method: 'POST', body: JSON.stringify({ sdp, type: 'offer', cameraId }),
+      method: 'POST',
+      body: JSON.stringify(
+        target.kind === 'camera'
+          ? { sdp, type: 'offer', cameraId: target.cameraId, yoloEnabled: target.yoloEnabled ?? true }
+          : { sdp, type: 'offer', robotId: target.robotId },
+      ),
     }),
 }

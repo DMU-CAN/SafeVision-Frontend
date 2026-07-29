@@ -29,7 +29,33 @@ export interface Camera {
   status: CameraStatus
   location?: string
   rtspUrl?: string
+  locationX?: number | null
+  locationY?: number | null
   selected?: boolean
+}
+
+export type RobotStatus = 'IDLE' | 'DISPATCHED' | 'OFFLINE'
+
+export interface Robot {
+  id: number
+  name: string
+  controlAddress: string
+  cameraRtspUrl: string
+  locationX: number | null
+  locationY: number | null
+  status: RobotStatus
+  createdAt: string
+}
+
+export type PtzDirection = 'up' | 'down' | 'left' | 'right' | 'zoomIn' | 'zoomOut' | 'stop'
+
+export interface RobotDispatch {
+  id: number
+  robotId: number
+  safetyEventId: number | null
+  targetX: number | null
+  targetY: number | null
+  dispatchedAt: string
 }
 
 export type CameraBoxState = 'normal' | 'active' | 'alert'

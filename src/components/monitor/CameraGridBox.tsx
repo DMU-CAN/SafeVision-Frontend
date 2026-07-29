@@ -9,11 +9,16 @@ interface CameraGridBoxProps {
   zoneDraftPoints?: ZonePoint[]
   existingZones?: ZonePoint[][]
   onZonePointAdd?: (point: ZonePoint) => void
+  yoloEnabled?: boolean
+  robotId?: number
 }
 
-export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones, onZonePointAdd }: CameraGridBoxProps) {
+export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones, onZonePointAdd, yoloEnabled = true, robotId }: CameraGridBoxProps) {
   const cameraId = Number(box.id)
-  const { videoRef, status } = useWebRTCStream(Number.isFinite(cameraId) ? cameraId : undefined)
+  const target = robotId !== undefined
+    ? { kind: 'robot' as const, robotId }
+    : Number.isFinite(cameraId) ? { kind: 'camera' as const, cameraId, yoloEnabled } : undefined
+  const { videoRef, status } = useWebRTCStream(target)
 
   const handleZoneClick = (event: MouseEvent<SVGSVGElement>) => {
     if (!zoneEditing || !onZonePointAdd) return

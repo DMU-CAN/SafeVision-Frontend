@@ -1,23 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
-import { getConnection, type WebRTCStatus } from './webrtcManager'
+import { getConnection, streamTargetKey, type StreamTarget, type WebRTCStatus } from './webrtcManager'
 
 export type { WebRTCStatus }
 
-export function useWebRTCStream(cameraId: number | undefined) {
+export function useWebRTCStream(target: StreamTarget | undefined) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [status, setStatus] = useState<WebRTCStatus>('connecting')
+  const targetKey = target ? streamTargetKey(target) : undefined
 
   useEffect(() => {
-    if (cameraId === undefined) return
+    if (!target) return
 
     let unsubscribe: (() => void) | undefined
 
     // Delay by a macrotask so React StrictMode's dev-only double mount
     // (mount -> cleanup -> mount) is harmless here: the connection is shared
-    // and keyed by cameraId via webrtcManager, so a throwaway subscribe/
-    // unsubscribe pair never creates a second peer connection.
+    // and keyed by the target, so a throwaway subscribe/unsubscribe pair
+    // never creates a second peer connection.
     const timer = setTimeout(() => {
-      const conn = getConnection(cameraId)
+      const conn = getConnection(target)
       const sync = () => {
         setStatus(conn.status)
         if (videoRef.current && conn.stream && videoRef.current.srcObject !== conn.stream) {
@@ -34,9 +35,10 @@ export function useWebRTCStream(cameraId: number | undefined) {
       unsubscribe?.()
       // Intentionally not closing the underlying RTCPeerConnection here —
       // webrtcManager keeps it alive across screen/tab switches so the
-      // camera doesn't reconnect every time the view changes.
+      // stream doesn't reconnect every time the view changes.
     }
-  }, [cameraId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetKey])
 
   return { videoRef, status }
 }
