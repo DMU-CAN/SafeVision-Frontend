@@ -91,7 +91,7 @@
 .camera-box__detection--alert .camera-box__detection-tag {
   background: var(--danger-red);
 }
-.camera-box__stream { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; background: #111820; }
+.camera-box__stream { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; background: #111820; }
 
 .camera-box__overlay {
   position: absolute;
