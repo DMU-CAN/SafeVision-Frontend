@@ -64,11 +64,31 @@
   padding: 5px 0 5px 15px;
   font-size: 13px;
   color: var(--text-main);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.camera-row:hover {
+  background: var(--panel-header);
+}
+
+.camera-row--selected {
+  background: var(--panel-header);
 }
 
 .camera-row--selected .camera-row__label {
   color: var(--accent-blue);
   font-weight: bold;
+}
+
+.camera-sidebar__state {
+  padding: 10px 0 10px 15px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.camera-sidebar__state--error {
+  color: var(--danger-red);
 }
 
 .status-dot {

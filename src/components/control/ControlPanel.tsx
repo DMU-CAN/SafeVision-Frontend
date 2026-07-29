@@ -5,10 +5,15 @@ import './ControlPanel.css'
 
 interface Zone { id: number; name: string; cameraId: number | null; points: { x: number; y: number }[] }
 
-export function ControlPanel({ cameras }: { cameras: Camera[] }) {
+interface ControlPanelProps {
+  cameras: Camera[]
+  selectedCameraId?: number | string | null
+}
+
+export function ControlPanel({ cameras, selectedCameraId }: ControlPanelProps) {
   const [zones, setZones] = useState<Zone[]>([])
   const [name, setName] = useState('위험 구역')
-  const cameraId = cameras[0]?.id
+  const cameraId = selectedCameraId ?? cameras[0]?.id
 
   const loadZones = () => api.get<Zone[]>(cameraId ? `/zones?cameraId=${cameraId}` : '/zones').then(setZones).catch(() => setZones([]))
   useEffect(() => { loadZones() }, [cameraId])

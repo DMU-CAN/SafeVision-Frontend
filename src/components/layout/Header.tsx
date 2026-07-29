@@ -6,9 +6,10 @@ interface HeaderProps {
   now: string
   operatorName: string
   onTabChange: (tab: string) => void
+  onLogout?: () => void
 }
 
-export function Header({ activeTab, now, operatorName, onTabChange }: HeaderProps) {
+export function Header({ activeTab, now, operatorName, onTabChange, onLogout }: HeaderProps) {
   return (
     <header className="app-header">
       <div className="app-header__brand">
@@ -34,6 +35,9 @@ export function Header({ activeTab, now, operatorName, onTabChange }: HeaderProp
         <span>{now}</span>
         <span className="status-dot" />
         <span>관제원: {operatorName}</span>
+        {onLogout && (
+          <button type="button" className="app-header__logout" onClick={onLogout}>로그아웃</button>
+        )}
       </div>
     </header>
   )

@@ -63,3 +63,13 @@
   border-radius: 50%;
   background: var(--success-green);
 }
+
+.app-header__logout {
+  height: 26px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 4px;
+  background: var(--btn-bg);
+  color: var(--text-muted);
+  font-size: 12px;
+}

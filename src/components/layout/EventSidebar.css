@@ -37,6 +37,16 @@
   overflow-y: auto;
 }
 
+.event-sidebar__state {
+  padding: 10px 2px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.event-sidebar__state--error {
+  color: var(--danger-red);
+}
+
 .event-card {
   padding: 10px;
   background: #1e2330;

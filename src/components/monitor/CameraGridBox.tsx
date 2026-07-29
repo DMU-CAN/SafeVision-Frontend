@@ -1,5 +1,5 @@
 import type { CameraBox } from '../../types'
-import { API_BASE_URL } from '../../api/client'
+import { useWebRTCStream } from '../../hooks/useWebRTCStream'
 import './CameraGridBox.css'
 
 interface CameraGridBoxProps {
@@ -7,6 +7,8 @@ interface CameraGridBoxProps {
 }
 
 export function CameraGridBox({ box }: CameraGridBoxProps) {
+  const cameraId = Number(box.id)
+  const { videoRef, status } = useWebRTCStream(Number.isFinite(cameraId) ? cameraId : undefined)
   const boxClass =
     box.state === 'active'
       ? 'camera-box camera-box--active'
@@ -38,12 +40,20 @@ export function CameraGridBox({ box }: CameraGridBoxProps) {
         )}
       </div>
 
-      <img
+      <video
         className="camera-box__stream"
-        src={`${API_BASE_URL}/cameras/${box.id}/mjpeg`}
-        alt={`${box.label} 실시간 영상`}
-        onError={(event) => { event.currentTarget.style.display = 'none' }}
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
       />
+
+      {status === 'connecting' && (
+        <div className="camera-box__overlay">연결 중...</div>
+      )}
+      {status === 'error' && (
+        <div className="camera-box__overlay camera-box__overlay--error">영상 연결 실패</div>
+      )}
 
       {box.detection && (
         <div

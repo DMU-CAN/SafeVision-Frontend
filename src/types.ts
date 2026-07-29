@@ -1,3 +1,13 @@
+export interface User {
+  id: number
+  username: string
+  name: string
+  phoneNumber: string
+  department: string
+  role: string
+  createdAt: string
+}
+
 export type CameraStatus = 'online' | 'offline' | 'maintenance' | 'alert'
 
 export interface Camera {
