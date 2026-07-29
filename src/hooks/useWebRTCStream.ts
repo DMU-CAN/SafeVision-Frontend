@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { api } from '../api/client'
+import { getConnection, type WebRTCStatus } from './webrtcManager'
 
-export type WebRTCStatus = 'connecting' | 'connected' | 'error'
+export type { WebRTCStatus }
 
 export function useWebRTCStream(cameraId: number | undefined) {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -10,48 +10,31 @@ export function useWebRTCStream(cameraId: number | undefined) {
   useEffect(() => {
     if (cameraId === undefined) return
 
-    let cancelled = false
-    let pc: RTCPeerConnection | null = null
-    let sessionId: string | undefined
+    let unsubscribe: (() => void) | undefined
 
-    async function connect() {
-      setStatus('connecting')
-      pc = new RTCPeerConnection()
-      pc.addTransceiver('video', { direction: 'recvonly' })
-      pc.ontrack = (event) => {
-        if (videoRef.current) videoRef.current.srcObject = event.streams[0]
-      }
-      pc.oniceconnectionstatechange = () => {
-        if (pc && (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected')) {
-          setStatus('error')
+    // Delay by a macrotask so React StrictMode's dev-only double mount
+    // (mount -> cleanup -> mount) is harmless here: the connection is shared
+    // and keyed by cameraId via webrtcManager, so a throwaway subscribe/
+    // unsubscribe pair never creates a second peer connection.
+    const timer = setTimeout(() => {
+      const conn = getConnection(cameraId)
+      const sync = () => {
+        setStatus(conn.status)
+        if (videoRef.current && conn.stream && videoRef.current.srcObject !== conn.stream) {
+          videoRef.current.srcObject = conn.stream
         }
       }
-
-      try {
-        const offer = await pc.createOffer()
-        await pc.setLocalDescription(offer)
-        if (!offer.sdp) throw new Error('offer sdp missing')
-        const answer = await api.webrtcOffer(offer.sdp, cameraId as number)
-        if (cancelled) return
-        sessionId = answer.sessionId
-        await pc.setRemoteDescription({ sdp: answer.sdp, type: 'answer' })
-        if (!cancelled) setStatus('connected')
-      } catch {
-        if (!cancelled) setStatus('error')
-      }
-    }
-
-    // Delay the actual connection by a macrotask so React StrictMode's dev-only
-    // double mount (mount -> cleanup -> mount) cancels the first, throwaway
-    // run before it ever reaches the network — otherwise two concurrent
-    // /webrtc/offer calls race for the same camera source and one gets a 400.
-    const timer = setTimeout(connect, 0)
+      conn.listeners.add(sync)
+      sync()
+      unsubscribe = () => conn.listeners.delete(sync)
+    }, 0)
 
     return () => {
-      cancelled = true
       clearTimeout(timer)
-      pc?.close()
-      if (sessionId) api.delete(`/webrtc/sessions/${sessionId}`).catch(() => undefined)
+      unsubscribe?.()
+      // Intentionally not closing the underlying RTCPeerConnection here —
+      // webrtcManager keeps it alive across screen/tab switches so the
+      // camera doesn't reconnect every time the view changes.
     }
   }, [cameraId])
 

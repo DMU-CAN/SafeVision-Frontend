@@ -15,6 +15,7 @@ import './App.css'
 import { api, getStoredUser, isAuthenticated, UNAUTHORIZED_EVENT } from './api/client'
 import type { Camera, SafetyEvent, Zone, ZonePoint } from './types'
 import { ControlPanel } from './components/control/ControlPanel'
+import { closeAllConnections, closeConnection } from './hooks/webrtcManager'
 
 function normalizeCameraStatus(status: string): Camera['status'] {
   if (status === 'ONLINE') return 'online'
@@ -108,7 +109,7 @@ function App() {
   }
 
   const user = getStoredUser()
-  const handleLogout = () => { api.logout().finally(() => setAuthed(false)) }
+  const handleLogout = () => { closeAllConnections(); api.logout().finally(() => setAuthed(false)) }
 
   const handleRegisterCamera = async (payload: { name: string; rtspUrl: string; location: string }) => {
     await api.post('/cameras', payload)
@@ -134,7 +135,10 @@ function App() {
 
   const handleDeleteCamera = (cameraId: number | string) => {
     api.delete(`/cameras/${cameraId}`)
-      .then(() => loadCameras())
+      .then(() => {
+        if (typeof cameraId === 'number') closeConnection(cameraId)
+        return loadCameras()
+      })
       .catch(() => setCamerasError('카메라 삭제에 실패했습니다.'))
   }
 
