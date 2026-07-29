@@ -175,6 +175,8 @@ function App() {
               cameras={cameras}
               selectedCameraId={selectedCameraId}
               zones={zones}
+              events={safetyEvents}
+              onPlayClip={setActiveClipUrl}
             />
             <EventSidebar events={mappedEvents} loading={eventsLoading} error={eventsError} onPlayClip={setActiveClipUrl} />
           </div>

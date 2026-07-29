@@ -111,31 +111,31 @@
   overflow: visible;
 }
 
-.timeline-bar__recorded {
-  position: absolute;
-  inset: 0;
-  width: 70%;
-  background: #1d4ed8;
-  opacity: 0.6;
-  border-radius: 3px 0 0 3px;
-}
-
 .timeline-bar__event-marker {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 38%;
   width: 6px;
+  margin-left: -3px;
+  border: none;
+  border-radius: 2px;
   background: var(--danger-red);
+  cursor: pointer;
+}
+
+.timeline-bar__event-marker:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .timeline-bar__playhead {
   position: absolute;
   top: -4px;
   bottom: -4px;
-  left: 52%;
   width: 2px;
+  margin-left: -1px;
   background: var(--text-header);
+  pointer-events: none;
 }
 
 .timeline-bar__scale {
