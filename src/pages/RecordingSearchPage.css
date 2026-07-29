@@ -1,0 +1,188 @@
+.recording-page {
+  flex: 1;
+  padding: 28px 32px;
+}
+
+.recording-page__heading,
+.recording-results__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.page-eyebrow {
+  color: var(--accent-blue);
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.12em;
+}
+
+.recording-page h1 {
+  margin: 8px 0 4px;
+  color: var(--text-header);
+  font-size: 28px;
+}
+
+.recording-page__heading p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.recording-page__status {
+  padding: 6px 10px;
+  border: 1px solid var(--success-green);
+  border-radius: 4px;
+  color: var(--success-green);
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.recording-search-panel,
+.recording-results {
+  margin-top: 24px;
+  padding: 18px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.recording-search-panel {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.recording-field {
+  display: flex;
+  min-width: 150px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recording-field label {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.recording-field select,
+.recording-field input {
+  height: 34px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-main);
+  font: inherit;
+  font-size: 12px;
+}
+
+.recording-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  color: var(--text-main);
+  font-size: 12px;
+}
+
+.recording-search-btn {
+  height: 34px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 4px;
+  background: var(--accent-blue);
+  color: var(--text-header);
+  font-weight: bold;
+}
+
+.recording-results__header {
+  align-items: center;
+}
+
+.recording-results h2 {
+  margin: 0;
+  color: var(--text-header);
+  font-size: 15px;
+}
+
+.recording-results__header > span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.recording-timeline {
+  margin: 22px 0 18px;
+}
+
+.recording-timeline__track {
+  position: relative;
+  height: 18px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--cam-box);
+}
+
+.recording-timeline__track::before {
+  position: absolute;
+  inset: 0;
+  width: 70%;
+  border-radius: 3px 0 0 3px;
+  background: #1d4ed8;
+  content: '';
+  opacity: 0.65;
+}
+
+.recording-timeline__marker {
+  position: absolute;
+  z-index: 1;
+  top: -4px;
+  left: 76%;
+  width: 2px;
+  height: 26px;
+  background: var(--danger-red);
+}
+
+.recording-timeline__scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.recording-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recording-item {
+  display: grid;
+  grid-template-columns: 10px 70px 70px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #1e2330;
+  color: var(--text-main);
+  text-align: left;
+}
+
+.recording-item__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.recording-item__dot--danger { background: var(--danger-red); }
+.recording-item__dot--warning { background: #f59e0b; }
+.recording-item__dot--info { background: var(--accent-blue); }
+.recording-item__time,
+.recording-item__camera { color: var(--text-muted); font-size: 11px; }
+.recording-item__label { font-size: 12px; }
+.recording-item__action { color: var(--accent-blue); font-size: 11px; font-weight: bold; }

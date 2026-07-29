@@ -1,0 +1,147 @@
+.monitor-grid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.camera-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.camera-grid--1-1 {
+  grid-template-columns: 1fr;
+}
+
+.camera-grid--2-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.camera-grid--4-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.layout-switcher {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 15px;
+  background: #181b26;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.layout-switcher__label {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.layout-switcher__btn {
+  width: 35px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  background: var(--btn-bg);
+  color: var(--text-main);
+  font-size: 10px;
+}
+
+.layout-switcher__btn--active {
+  background: var(--accent-blue);
+  color: var(--text-header);
+}
+
+.timeline-panel {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 20px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.playback-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.playback-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--btn-bg);
+  color: var(--text-header);
+  font-size: 11px;
+}
+
+.playback-btn--play {
+  width: 32px;
+  height: 32px;
+  background: var(--accent-blue);
+  font-size: 13px;
+}
+
+.playback-time {
+  margin-left: 6px;
+  color: var(--text-main);
+  font-weight: bold;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.timeline-bar {
+  flex: 1;
+  min-width: 0;
+}
+
+.timeline-bar__track {
+  position: relative;
+  height: 24px;
+  background: var(--cam-box);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: visible;
+}
+
+.timeline-bar__recorded {
+  position: absolute;
+  inset: 0;
+  width: 70%;
+  background: #1d4ed8;
+  opacity: 0.6;
+  border-radius: 3px 0 0 3px;
+}
+
+.timeline-bar__event-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 38%;
+  width: 6px;
+  background: var(--danger-red);
+}
+
+.timeline-bar__playhead {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: 52%;
+  width: 2px;
+  background: var(--text-header);
+}
+
+.timeline-bar__scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 9px;
+}

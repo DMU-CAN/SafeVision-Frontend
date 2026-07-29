@@ -1,0 +1,89 @@
+.camera-box {
+  position: relative;
+  height: 180px;
+  background: var(--cam-box);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.camera-box--active {
+  border: 2px solid var(--accent-blue);
+}
+
+.camera-box--alert {
+  border: 2px solid var(--danger-red);
+}
+
+.camera-box__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 10px 0;
+}
+
+.camera-box__label {
+  font-size: 13px;
+  color: var(--text-main);
+}
+
+.camera-box__label--accent {
+  color: var(--accent-blue);
+  font-weight: bold;
+}
+
+.camera-box__label--danger {
+  color: var(--danger-red);
+  font-weight: bold;
+}
+
+.camera-box__badge {
+  font-size: 9px;
+  font-weight: bold;
+  color: var(--text-header);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.camera-box__badge--blue {
+  background: var(--accent-blue);
+}
+
+.camera-box__badge--red {
+  background: var(--danger-red);
+}
+
+.camera-box__detection {
+  position: absolute;
+  left: 45px;
+  top: 42px;
+  width: 90px;
+  height: 90px;
+}
+
+.camera-box__detection-box {
+  position: absolute;
+  inset: 0;
+  border: 1.5px dashed var(--accent-blue);
+}
+
+.camera-box__detection--alert .camera-box__detection-box {
+  border: 2px solid var(--danger-red);
+  border-style: solid;
+}
+
+.camera-box__detection-tag {
+  position: absolute;
+  top: -18px;
+  left: 0;
+  font-size: 8px;
+  color: var(--text-header);
+  background: var(--accent-blue);
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+.camera-box__detection--alert .camera-box__detection-tag {
+  background: var(--danger-red);
+}
+.camera-box__stream { display: block; width: 100%; height: 100%; min-height: 120px; object-fit: cover; background: #111820; }

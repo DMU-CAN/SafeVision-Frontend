@@ -1,0 +1,65 @@
+.app-header {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 20px;
+  background: #181b26;
+  border-bottom: 1px solid var(--border);
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.app-header__logo {
+  color: var(--accent-blue);
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.app-header__version {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.app-header__tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-tab {
+  height: 28px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 4px;
+  background: var(--btn-bg);
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.nav-tab--active {
+  background: var(--btn-active-bg);
+  color: var(--text-main);
+  font-weight: bold;
+}
+
+.app-header__status {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-size: 13px;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--success-green);
+}
