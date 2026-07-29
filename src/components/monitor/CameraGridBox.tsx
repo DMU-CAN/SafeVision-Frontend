@@ -1,14 +1,27 @@
-import type { CameraBox } from '../../types'
+import type { MouseEvent } from 'react'
+import type { CameraBox, ZonePoint } from '../../types'
 import { useWebRTCStream } from '../../hooks/useWebRTCStream'
 import './CameraGridBox.css'
 
 interface CameraGridBoxProps {
   box: CameraBox
+  zoneEditing?: boolean
+  zoneDraftPoints?: ZonePoint[]
+  existingZones?: ZonePoint[][]
+  onZonePointAdd?: (point: ZonePoint) => void
 }
 
-export function CameraGridBox({ box }: CameraGridBoxProps) {
+export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones, onZonePointAdd }: CameraGridBoxProps) {
   const cameraId = Number(box.id)
   const { videoRef, status } = useWebRTCStream(Number.isFinite(cameraId) ? cameraId : undefined)
+
+  const handleZoneClick = (event: MouseEvent<SVGSVGElement>) => {
+    if (!zoneEditing || !onZonePointAdd) return
+    const rect = event.currentTarget.getBoundingClientRect()
+    const x = Math.round(((event.clientX - rect.left) / rect.width) * 1000)
+    const y = Math.round(((event.clientY - rect.top) / rect.height) * 600)
+    onZonePointAdd({ x, y })
+  }
   const boxClass =
     box.state === 'active'
       ? 'camera-box camera-box--active'
@@ -53,6 +66,34 @@ export function CameraGridBox({ box }: CameraGridBoxProps) {
       )}
       {status === 'error' && (
         <div className="camera-box__overlay camera-box__overlay--error">영상 연결 실패</div>
+      )}
+
+      {(zoneEditing || (existingZones && existingZones.length > 0)) && (
+        <svg
+          className={zoneEditing ? 'camera-box__zone-layer camera-box__zone-layer--editing' : 'camera-box__zone-layer'}
+          viewBox="0 0 1000 600"
+          preserveAspectRatio="none"
+          onClick={handleZoneClick}
+        >
+          {existingZones?.map((points, index) => (
+            <polygon
+              key={index}
+              className="camera-box__zone-shape"
+              points={points.map((point) => `${point.x},${point.y}`).join(' ')}
+            />
+          ))}
+          {zoneDraftPoints && zoneDraftPoints.length > 0 && (
+            <>
+              <polyline
+                className="camera-box__zone-draft"
+                points={zoneDraftPoints.map((point) => `${point.x},${point.y}`).join(' ')}
+              />
+              {zoneDraftPoints.map((point, index) => (
+                <circle key={index} className="camera-box__zone-point" cx={point.x} cy={point.y} r={6} />
+              ))}
+            </>
+          )}
+        </svg>
       )}
 
       {box.detection && (

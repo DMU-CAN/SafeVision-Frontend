@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Header } from './components/layout/Header'
 import { CameraSidebar } from './components/layout/CameraSidebar'
 import { MonitorGrid } from './components/monitor/MonitorGrid'
@@ -11,7 +11,7 @@ import { StatisticsPage } from './pages/StatisticsPage'
 import { LoginPage } from './pages/LoginPage'
 import './App.css'
 import { api, getStoredUser, isAuthenticated, UNAUTHORIZED_EVENT } from './api/client'
-import type { Camera, SafetyEvent } from './types'
+import type { Camera, SafetyEvent, Zone, ZonePoint } from './types'
 import { ControlPanel } from './components/control/ControlPanel'
 
 function normalizeCameraStatus(status: string): Camera['status'] {
@@ -32,18 +32,16 @@ function App() {
   const [eventsLoading, setEventsLoading] = useState(true)
   const [eventsError, setEventsError] = useState<string | null>(null)
   const [selectedCameraId, setSelectedCameraId] = useState<number | string | null>(null)
+  const [zones, setZones] = useState<Zone[]>([])
+  const [zonesLoading, setZonesLoading] = useState(false)
+  const [zonesError, setZonesError] = useState<string | null>(null)
+  const [zoneEditing, setZoneEditing] = useState(false)
+  const [zoneDraftPoints, setZoneDraftPoints] = useState<ZonePoint[]>([])
 
-  useEffect(() => {
-    const handleUnauthorized = () => setAuthed(false)
-    window.addEventListener(UNAUTHORIZED_EVENT, handleUnauthorized)
-    return () => window.removeEventListener(UNAUTHORIZED_EVENT, handleUnauthorized)
-  }, [])
-
-  useEffect(() => {
-    if (!authed) return
+  const loadCameras = useCallback(() => {
     setCamerasLoading(true)
     setCamerasError(null)
-    api.get<{ items: Camera[] }>('/cameras')
+    return api.get<{ items: Camera[] }>('/cameras')
       .then((data) => {
         const normalized = data.items.map((camera) => ({
           ...camera,
@@ -54,7 +52,27 @@ function App() {
       })
       .catch(() => setCamerasError('카메라 목록을 불러오지 못했습니다.'))
       .finally(() => setCamerasLoading(false))
-  }, [authed])
+  }, [])
+
+  const loadZones = useCallback((cameraId: number | string | null) => {
+    setZonesLoading(true)
+    setZonesError(null)
+    return api.get<Zone[]>(cameraId ? `/zones?cameraId=${cameraId}` : '/zones')
+      .then(setZones)
+      .catch(() => setZonesError('위험 구역 목록을 불러오지 못했습니다.'))
+      .finally(() => setZonesLoading(false))
+  }, [])
+
+  useEffect(() => {
+    const handleUnauthorized = () => setAuthed(false)
+    window.addEventListener(UNAUTHORIZED_EVENT, handleUnauthorized)
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, handleUnauthorized)
+  }, [])
+
+  useEffect(() => {
+    if (!authed) return
+    loadCameras()
+  }, [authed, loadCameras])
 
   useEffect(() => {
     if (!authed) return
@@ -76,12 +94,41 @@ function App() {
       .finally(() => setEventsLoading(false))
   }, [authed, cameras])
 
+  useEffect(() => {
+    if (!authed) return
+    setZoneEditing(false)
+    setZoneDraftPoints([])
+    loadZones(selectedCameraId)
+  }, [authed, selectedCameraId, loadZones])
+
   if (!authed) {
     return <LoginPage onSuccess={() => setAuthed(true)} />
   }
 
   const user = getStoredUser()
   const handleLogout = () => { api.logout().finally(() => setAuthed(false)) }
+
+  const handleRegisterCamera = async (payload: { name: string; rtspUrl: string; location: string }) => {
+    await api.post('/cameras', payload)
+    await loadCameras()
+  }
+
+  const handleSaveZone = (name: string) => {
+    if (!selectedCameraId || zoneDraftPoints.length < 3) return
+    api.post('/zones', { name, cameraId: selectedCameraId, points: zoneDraftPoints })
+      .then(() => {
+        setZoneEditing(false)
+        setZoneDraftPoints([])
+        return loadZones(selectedCameraId)
+      })
+      .catch(() => setZonesError('위험 구역 저장에 실패했습니다.'))
+  }
+
+  const handleDeleteZone = (zoneId: number) => {
+    api.delete(`/zones/${zoneId}`)
+      .then(() => loadZones(selectedCameraId))
+      .catch(() => setZonesError('위험 구역 삭제에 실패했습니다.'))
+  }
 
   const isMonitorPage = activeTab === navTabs[0]
   const isRecordingPage = activeTab === navTabs[1]
@@ -107,10 +154,31 @@ function App() {
               selectedCameraId={selectedCameraId}
               onSelectCamera={setSelectedCameraId}
             />
-            <MonitorGrid cameras={cameras} selectedCameraId={selectedCameraId} />
+            <MonitorGrid
+              cameras={cameras}
+              selectedCameraId={selectedCameraId}
+              zones={zones}
+              zoneEditing={zoneEditing}
+              zoneDraftPoints={zoneDraftPoints}
+              onZonePointAdd={(point) => setZoneDraftPoints((current) => [...current, point])}
+            />
             <EventSidebar events={safetyEvents} loading={eventsLoading} error={eventsError} />
           </div>
-          <ControlPanel cameras={cameras} selectedCameraId={selectedCameraId} />
+          <ControlPanel
+            cameras={cameras}
+            selectedCameraId={selectedCameraId}
+            zones={zones}
+            zonesLoading={zonesLoading}
+            zonesError={zonesError}
+            zoneEditing={zoneEditing}
+            zoneDraftPoints={zoneDraftPoints}
+            onStartZoneEditing={() => { setZoneEditing(true); setZoneDraftPoints([]) }}
+            onUndoZonePoint={() => setZoneDraftPoints((current) => current.slice(0, -1))}
+            onCancelZoneEditing={() => { setZoneEditing(false); setZoneDraftPoints([]) }}
+            onSaveZone={handleSaveZone}
+            onDeleteZone={handleDeleteZone}
+            onRegisterCamera={handleRegisterCamera}
+          />
         </>
 
       ) : isRecordingPage ? (

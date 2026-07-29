@@ -8,6 +8,19 @@ export interface User {
   createdAt: string
 }
 
+export interface ZonePoint {
+  x: number
+  y: number
+}
+
+export interface Zone {
+  id: number
+  name: string
+  cameraId: number | null
+  points: ZonePoint[]
+  isActive: boolean
+}
+
 export type CameraStatus = 'online' | 'offline' | 'maintenance' | 'alert'
 
 export interface Camera {
