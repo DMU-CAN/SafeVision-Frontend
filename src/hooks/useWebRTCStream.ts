@@ -41,10 +41,15 @@ export function useWebRTCStream(cameraId: number | undefined) {
       }
     }
 
-    connect()
+    // Delay the actual connection by a macrotask so React StrictMode's dev-only
+    // double mount (mount -> cleanup -> mount) cancels the first, throwaway
+    // run before it ever reaches the network — otherwise two concurrent
+    // /webrtc/offer calls race for the same camera source and one gets a 400.
+    const timer = setTimeout(connect, 0)
 
     return () => {
       cancelled = true
+      clearTimeout(timer)
       pc?.close()
       if (sessionId) api.delete(`/webrtc/sessions/${sessionId}`).catch(() => undefined)
     }
