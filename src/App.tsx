@@ -208,7 +208,7 @@ function App() {
           onDeleteZone={handleDeleteZone}
         />
       ) : isRecordingPage ? (
-        <RecordingSearchPage />
+        <RecordingSearchPage cameras={cameras} events={safetyEvents} loading={eventsLoading} error={eventsError} onPlayClip={setActiveClipUrl} />
       ) : isAnalysisPage ? (
         <AiAnalysisPage cameras={cameras} events={safetyEvents} loading={eventsLoading} error={eventsError} onPlayClip={setActiveClipUrl} />
       ) : isStatisticsPage ? (

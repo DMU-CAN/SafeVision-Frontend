@@ -3,6 +3,18 @@
   padding: 28px 32px;
 }
 
+.recording-page__hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.recording-page__error {
+  margin: 0;
+  color: var(--danger-red);
+  font-size: 12px;
+}
+
 .recording-page__heading,
 .recording-results__header {
   display: flex;
@@ -79,15 +91,6 @@
   font-size: 12px;
 }
 
-.recording-check {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 34px;
-  color: var(--text-main);
-  font-size: 12px;
-}
-
 .recording-search-btn {
   height: 34px;
   padding: 0 22px;
@@ -113,46 +116,6 @@
   font-size: 12px;
 }
 
-.recording-timeline {
-  margin: 22px 0 18px;
-}
-
-.recording-timeline__track {
-  position: relative;
-  height: 18px;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  background: var(--cam-box);
-}
-
-.recording-timeline__track::before {
-  position: absolute;
-  inset: 0;
-  width: 70%;
-  border-radius: 3px 0 0 3px;
-  background: #1d4ed8;
-  content: '';
-  opacity: 0.65;
-}
-
-.recording-timeline__marker {
-  position: absolute;
-  z-index: 1;
-  top: -4px;
-  left: 76%;
-  width: 2px;
-  height: 26px;
-  background: var(--danger-red);
-}
-
-.recording-timeline__scale {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 6px;
-  color: var(--text-muted);
-  font-size: 10px;
-}
-
 .recording-list {
   display: flex;
   flex-direction: column;
@@ -171,6 +134,12 @@
   background: #1e2330;
   color: var(--text-main);
   text-align: left;
+  cursor: pointer;
+}
+
+.recording-item:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .recording-item__dot {
