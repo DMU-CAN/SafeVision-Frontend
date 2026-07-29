@@ -1,0 +1,255 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" width="100%" height="100%" style="background-color: #12151e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <!-- Style Definitions -->
+  <style>
+    .panel { fill: #1a1d28; stroke: #2a2e3d; stroke-width: 1; }
+    .panel-header { fill: #222634; }
+    .text-main { fill: #e1e4ed; font-size: 13px; }
+    .text-muted { fill: #7a829a; font-size: 11px; }
+    .text-header { fill: #ffffff; font-size: 14px; font-weight: bold; }
+    .text-accent { fill: #3b82f6; font-size: 12px; font-weight: bold; }
+    .text-danger { fill: #ef4444; font-size: 11px; font-weight: bold; }
+    .cam-box { fill: #0d0f16; stroke: #2a2e3d; stroke-width: 1; }
+    .cam-box-active { fill: #0d0f16; stroke: #3b82f6; stroke-width: 2; }
+    .cam-box-alert { fill: #0d0f16; stroke: #ef4444; stroke-width: 2; }
+    .btn { fill: #2b3042; rx: 4; }
+    .btn-active { fill: #3b82f6; rx: 4; }
+    .badge-red { fill: #ef4444; rx: 3; }
+    .badge-blue { fill: #3b82f6; rx: 3; }
+  </style>
+
+  <!-- 1. TOP NAVBAR -->
+  <rect x="0" y="0" width="1200" height="48" fill="#181b26" stroke="#2a2e3d" stroke-width="1"/>
+  <text x="20" y="29" class="text-header" font-size="16" fill="#3b82f6">🛡️ SAFE-VISION <tspan fill="#7a829a" font-size="12" font-weight="normal">v2.4 Control Center</tspan></text>
+  
+  <!-- Navigation Tabs -->
+  <rect x="220" y="10" width="90" height="28" class="btn-active"/>
+  <text x="265" y="28" class="text-main" text-anchor="middle" font-weight="bold">실시간 관제</text>
+  
+  <rect x="318" y="10" width="90" height="28" class="btn"/>
+  <text x="363" y="28" class="text-muted" text-anchor="middle">녹화 검색</text>
+  
+  <rect x="416" y="10" width="90" height="28" class="btn"/>
+  <text x="461" y="28" class="text-muted" text-anchor="middle">AI 지능형 분석</text>
+
+  <rect x="514" y="10" width="90" height="28" class="btn"/>
+  <text x="559" y="28" class="text-muted" text-anchor="middle">통계/리포트</text>
+
+  <!-- Top Right System Info -->
+  <text x="1050" y="29" class="text-main" text-anchor="end">2026-07-29 10:47:56</text>
+  <circle cx="1075" cy="24" r="5" fill="#10b981"/>
+  <text x="1180" y="29" class="text-main" text-anchor="end">관제원: 홍길동 (SYS_ADMIN)</text>
+
+  <!-- 2. LEFT SIDEBAR: CAMERA TREE & PTZ -->
+  <rect x="10" y="58" width="220" height="680" class="panel" rx="6"/>
+  <rect x="10" y="58" width="220" height="36" class="panel-header" rx="6"/>
+  <text x="24" y="81" class="text-header">카메라 목록 (32/36)</text>
+
+  <!-- Search Bar -->
+  <rect x="20" y="102" width="200" height="28" fill="#12151e" stroke="#2a2e3d" rx="4"/>
+  <text x="30" y="120" class="text-muted">🔍 카메라 이름/IP 검색...</text>
+
+  <!-- Tree View -->
+  <g transform="translate(20, 145)">
+    <!-- Zone A -->
+    <text x="0" y="12" class="text-main" font-weight="bold">📂 제1구역 (A동 빌딩)</text>
+    <text x="15" y="32" class="text-main">📹 [CAM-01] 메인 로비 Central</text>
+    <circle cx="195" cy="28" r="4" fill="#10b981"/>
+    
+    <text x="15" y="52" class="text-accent">📹 [CAM-02] 동측 주차장 입구</text>
+    <circle cx="195" cy="48" r="4" fill="#10b981"/>
+
+    <text x="15" y="72" class="text-main">📹 [CAM-03] 외곽 펜스 N-1</text>
+    <circle cx="195" cy="68" r="4" fill="#ef4444"/>
+
+    <text x="15" y="92" class="text-main">📹 [CAM-04] B1 지하주차장</text>
+    <circle cx="195" cy="88" r="4" fill="#10b981"/>
+
+    <!-- Zone B -->
+    <text x="0" y="122" class="text-main" font-weight="bold">📂 제2구역 (B동 외곽)</text>
+    <text x="15" y="142" class="text-muted">📹 [CAM-05] 후문 출입구</text>
+    <circle cx="195" cy="138" r="4" fill="#10b981"/>
+    <text x="15" y="162" class="text-muted">📹 [CAM-06] 옥상 비상구</text>
+    <circle cx="195" cy="158" r="4" fill="#6b7280"/>
+  </g>
+
+  <!-- PTZ Controller Section -->
+  <rect x="20" y="480" width="200" height="248" fill="#12151e" stroke="#2a2e3d" rx="6"/>
+  <text x="30" y="502" class="text-header" font-size="12">PTZ 제어 (CAM-02)</text>
+  
+  <!-- PTZ Direction Pad -->
+  <circle cx="120" cy="570" r="45" fill="#1e2330" stroke="#2a2e3d"/>
+  <path d="M 120 530 L 128 542 L 112 542 Z" fill="#7a829a"/>
+  <path d="M 120 610 L 128 598 L 112 598 Z" fill="#7a829a"/>
+  <path d="M 80 570 L 92 562 L 92 578 Z" fill="#7a829a"/>
+  <path d="M 160 570 L 148 562 L 148 578 Z" fill="#7a829a"/>
+  <circle cx="120" cy="570" r="14" fill="#2b3042"/>
+  <text x="120" y="574" class="text-muted" text-anchor="middle" font-size="10">RESET</text>
+
+  <!-- Zoom Controls -->
+  <rect x="35" y="630" width="80" height="26" class="btn"/>
+  <text x="75" y="647" class="text-main" text-anchor="middle">🔍 Zoom +</text>
+  <rect x="125" y="630" width="80" height="26" class="btn"/>
+  <text x="165" y="647" class="text-main" text-anchor="middle">🔍 Zoom -</text>
+  
+  <!-- Preset Buttons -->
+  <rect x="35" y="665" width="50" height="22" class="btn"/>
+  <text x="60" y="680" class="text-muted" text-anchor="middle" font-size="10">P-1</text>
+  <rect x="95" y="665" width="50" height="22" class="btn"/>
+  <text x="120" y="680" class="text-muted" text-anchor="middle" font-size="10">P-2</text>
+  <rect x="155" y="665" width="50" height="22" class="btn"/>
+  <text x="180" y="680" class="text-muted" text-anchor="middle" font-size="10">P-3</text>
+
+
+  <!-- 3. CENTER: MAIN MONITORING GRID (3x3) -->
+  <!-- Row 1 -->
+  <rect x="240" y="58" width="220" height="180" class="cam-box"/>
+  <text x="250" y="78" class="text-main">CAM-01 로비</text>
+  <rect x="420" y="65" width="32" height="16" class="badge-blue"/>
+  <text x="436" y="77" class="text-header" font-size="9" text-anchor="middle">LIVE</text>
+  
+  <!-- Active Selected Camera -->
+  <rect x="470" y="58" width="220" height="180" class="cam-box-active"/>
+  <text x="480" y="78" class="text-accent">CAM-02 동측 주차장 [선택됨]</text>
+  <!-- Simulating AI Bounding Box -->
+  <rect x="520" y="100" width="60" height="90" stroke="#3b82f6" stroke-width="1.5" fill="none" stroke-dasharray="3,3"/>
+  <rect x="520" y="88" width="50" height="12" fill="#3b82f6"/>
+  <text x="522" y="97" fill="#fff" font-size="8">Vehicle 98%</text>
+
+  <!-- Alert Camera Grid -->
+  <rect x="700" y="58" width="220" height="180" class="cam-box-alert"/>
+  <text x="710" y="78" class="text-danger">CAM-03 외곽 펜스 [경보]</text>
+  <rect x="880" y="65" width="32" height="16" class="badge-red"/>
+  <text x="896" y="77" class="text-header" font-size="9" text-anchor="middle">EVENT</text>
+  <!-- Simulating AI Motion Box -->
+  <rect x="760" y="110" width="40" height="70" stroke="#ef4444" stroke-width="2" fill="none"/>
+  <rect x="760" y="98" width="55" height="12" fill="#ef4444"/>
+  <text x="762" y="107" fill="#fff" font-size="8">침입 감지!</text>
+
+  <!-- Row 2 -->
+  <rect x="240" y="248" width="220" height="180" class="cam-box"/>
+  <text x="250" y="268" class="text-main">CAM-04 B1 주차장</text>
+
+  <rect x="470" y="248" width="220" height="180" class="cam-box"/>
+  <text x="480" y="268" class="text-main">CAM-05 후문 출입구</text>
+
+  <rect x="700" y="248" width="220" height="180" class="cam-box"/>
+  <text x="710" y="268" class="text-main">CAM-06 옥상 비상구</text>
+
+  <!-- Row 3 -->
+  <rect x="240" y="438" width="220" height="180" class="cam-box"/>
+  <text x="250" y="458" class="text-main">CAM-07 엘리베이터 1호</text>
+
+  <rect x="470" y="438" width="220" height="180" class="cam-box"/>
+  <text x="480" y="458" class="text-main">CAM-08 외곽 동쪽 펜스</text>
+
+  <rect x="700" y="438" width="220" height="180" class="cam-box"/>
+  <text x="710" y="458" class="text-main">CAM-09 전기실 내부</text>
+
+  <!-- Grid Layout Switcher Bar -->
+  <rect x="240" y="626" width="680" height="30" fill="#181b26" stroke="#2a2e3d" rx="4"/>
+  <text x="255" y="645" class="text-muted">화면 분할:</text>
+  <rect x="310" y="631" width="35" height="20" class="btn"/><text x="327" y="645" class="text-main" font-size="10" text-anchor="middle">1x1</text>
+  <rect x="350" y="631" width="35" height="20" class="btn"/><text x="367" y="645" class="text-main" font-size="10" text-anchor="middle">2x2</text>
+  <rect x="390" y="631" width="35" height="20" class="btn-active"/><text x="407" y="645" class="text-header" font-size="10" text-anchor="middle">3x3</text>
+  <rect x="430" y="631" width="35" height="20" class="btn"/><text x="447" y="645" class="text-main" font-size="10" text-anchor="middle">4x4</text>
+
+
+  <!-- 4. BOTTOM: TIMELINE & CONTROLS -->
+  <rect x="240" y="664" width="680" height="74" class="panel" rx="6"/>
+  
+  <!-- Playback Control Buttons -->
+  <circle cx="265" cy="701" r="14" fill="#2b3042"/>
+  <text x="265" y="705" fill="#fff" text-anchor="middle" font-size="12">◀◀</text>
+  <circle cx="300" cy="701" r="16" fill="#3b82f6"/>
+  <text x="301" y="706" fill="#fff" text-anchor="middle" font-size="14">▶</text>
+  <circle cx="335" cy="701" r="14" fill="#2b3042"/>
+  <text x="335" y="705" fill="#fff" text-anchor="middle" font-size="12">▶▶</text>
+  
+  <text x="365" y="705" class="text-main" font-weight="bold">10:47:56</text>
+
+  <!-- Timeline Bar Graph -->
+  <rect x="440" y="680" width="460" height="24" fill="#0d0f16" stroke="#2a2e3d" rx="3"/>
+  <!-- Recorded Video Stream (Blue bars) -->
+  <rect x="440" y="680" width="320" height="24" fill="#1d4ed8" opacity="0.6"/>
+  <!-- Event Marker (Red line on timeline) -->
+  <rect x="610" y="680" width="6" height="24" fill="#ef4444"/>
+  <!-- Playhead (Current time) -->
+  <line x1="680" y1="672" x2="680" y2="712" stroke="#ffffff" stroke-width="2"/>
+  <polygon points="675,672 685,672 680,678" fill="#ffffff"/>
+  
+  <!-- Timeline Scale -->
+  <text x="440" y="718" class="text-muted" font-size="9">08:00</text>
+  <text x="550" y="718" class="text-muted" font-size="9">09:00</text>
+  <text x="660" y="718" class="text-muted" font-size="9">10:00</text>
+  <text x="770" y="718" class="text-muted" font-size="9">11:00</text>
+  <text x="880" y="718" class="text-muted" font-size="9">12:00</text>
+
+
+  <!-- 5. RIGHT SIDEBAR: REAL-TIME AI EVENT FEED -->
+  <rect x="930" y="58" width="260" height="680" class="panel" rx="6"/>
+  <rect x="930" y="58" width="260" height="36" class="panel-header" rx="6"/>
+  <text x="945" y="81" class="text-header">🚨 실시간 AI 감지 이력</text>
+  
+  <!-- Event Count Badge -->
+  <rect x="1135" y="68" width="40" height="18" class="badge-red"/>
+  <text x="1155" y="81" class="text-header" font-size="10" text-anchor="middle">NEW 3</text>
+
+  <!-- Event Item 1 (Danger) -->
+  <g transform="translate(940, 105)">
+    <rect x="0" y="0" width="240" height="75" fill="#26191c" stroke="#ef4444" stroke-width="1" rx="4"/>
+    <text x="10" y="20" class="text-danger">⚠️ [월담/침입] CAM-03 펜스</text>
+    <text x="10" y="38" class="text-main" font-size="11">구역 N-1 외곽 감지선 침범</text>
+    <text x="10" y="58" class="text-muted">10:46:12 | 미확인 객체 1명</text>
+    <rect x="175" y="42" width="55" height="22" class="btn-active"/>
+    <text x="202" y="56" class="text-header" font-size="10" text-anchor="middle">확인</text>
+  </g>
+
+  <!-- Event Item 2 (Warning) -->
+  <g transform="translate(940, 190)">
+    <rect x="0" y="0" width="240" height="75" fill="#1e2330" stroke="#2a2e3d" stroke-width="1" rx="4"/>
+    <text x="10" y="20" class="text-accent">🚗 [차량 인식] CAM-02 주차장</text>
+    <text x="10" y="38" class="text-main" font-size="11">미등록 차량 진입 (12가 3456)</text>
+    <text x="10" y="58" class="text-muted">10:42:05 | 게이트 A</text>
+    <rect x="175" y="42" width="55" height="22" class="btn"/>
+    <text x="202" y="56" class="text-muted" font-size="10" text-anchor="middle">상세</text>
+  </g>
+
+  <!-- Event Item 3 (Normal) -->
+  <g transform="translate(940, 275)">
+    <rect x="0" y="0" width="240" height="75" fill="#1e2330" stroke="#2a2e3d" stroke-width="1" rx="4"/>
+    <text x="10" y="20" class="text-main" font-weight="bold">👤 [얼굴 인식] CAM-01 로비</text>
+    <text x="10" y="38" class="text-main" font-size="11">등록 임직원 출입 확인 (김철수)</text>
+    <text x="10" y="58" class="text-muted">10:38:19 | 스피드게이트 2호</text>
+    <rect x="175" y="42" width="55" height="22" class="btn"/>
+    <text x="202" y="56" class="text-muted" font-size="10" text-anchor="middle">상세</text>
+  </g>
+
+  <!-- Event Item 4 (Warning) -->
+  <g transform="translate(940, 360)">
+    <rect x="0" y="0" width="240" height="75" fill="#1e2330" stroke="#2a2e3d" stroke-width="1" rx="4"/>
+    <text x="10" y="20" class="text-accent">🔥 [배회 감지] CAM-08 외곽</text>
+    <text x="10" y="38" class="text-main" font-size="11">동쪽 담장 주변 5분 이상 배회</text>
+    <text x="10" y="58" class="text-muted">10:15:40 | 객체 1명</text>
+    <rect x="175" y="42" width="55" height="22" class="btn"/>
+    <text x="202" y="56" class="text-muted" font-size="10" text-anchor="middle">상세</text>
+  </g>
+
+  <!-- System Health / Quick Action Panel at Right Bottom -->
+  <rect x="940" y="580" width="240" height="148" fill="#12151e" stroke="#2a2e3d" rx="4"/>
+  <text x="950" y="602" class="text-header" font-size="12">⚙️ 시스템 상태 요약</text>
+  
+  <text x="950" y="628" class="text-muted">CPU 사용량:</text>
+  <rect x="1020" y="620" width="110" height="10" fill="#222634" rx="5"/>
+  <rect x="1020" y="620" width="45" height="10" fill="#3b82f6" rx="5"/>
+  <text x="1140" y="629" class="text-main" font-size="10">40%</text>
+
+  <text x="950" y="650" class="text-muted">NVR 저장공간:</text>
+  <rect x="1020" y="642" width="110" height="10" fill="#222634" rx="5"/>
+  <rect x="1020" y="642" width="85" height="10" fill="#10b981" rx="5"/>
+  <text x="1140" y="651" class="text-main" font-size="10">78%</text>
+
+  <!-- Emergency Broadcast Button -->
+  <rect x="950" y="675" width="220" height="38" fill="#dc2626" rx="4"/>
+  <text x="1060" y="699" fill="#ffffff" font-weight="bold" font-size="13" text-anchor="middle">📢 비상 경보 방송 발령</text>
+
+</svg>
