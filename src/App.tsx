@@ -13,9 +13,12 @@ import { CameraManagementPage } from './pages/CameraManagementPage'
 import { ZoneSettingsPage } from './pages/ZoneSettingsPage'
 import './App.css'
 import { api, getStoredUser, isAuthenticated, UNAUTHORIZED_EVENT } from './api/client'
-import type { Camera, SafetyEvent, Zone, ZonePoint } from './types'
+import type { Camera, SafetyEventRaw, Zone, ZonePoint } from './types'
 import { ControlPanel } from './components/control/ControlPanel'
 import { closeAllConnections, closeConnection } from './hooks/webrtcManager'
+import { mapSafetyEvent } from './utils/events'
+
+const EVENTS_POLL_INTERVAL_MS = 8000
 
 function normalizeCameraStatus(status: string): Camera['status'] {
   if (status === 'ONLINE') return 'online'
@@ -31,7 +34,7 @@ function App() {
   const [cameras, setCameras] = useState<Camera[]>([])
   const [camerasLoading, setCamerasLoading] = useState(true)
   const [camerasError, setCamerasError] = useState<string | null>(null)
-  const [safetyEvents, setSafetyEvents] = useState<SafetyEvent[]>([])
+  const [safetyEvents, setSafetyEvents] = useState<SafetyEventRaw[]>([])
   const [eventsLoading, setEventsLoading] = useState(true)
   const [eventsError, setEventsError] = useState<string | null>(null)
   const [selectedCameraId, setSelectedCameraId] = useState<number | string | null>(null)
@@ -57,6 +60,15 @@ function App() {
       .finally(() => setCamerasLoading(false))
   }, [])
 
+  const loadEvents = useCallback((showLoading: boolean) => {
+    if (showLoading) setEventsLoading(true)
+    setEventsError(null)
+    return api.get<SafetyEventRaw[]>('/safety-events?limit=50')
+      .then(setSafetyEvents)
+      .catch(() => setEventsError('이벤트 목록을 불러오지 못했습니다.'))
+      .finally(() => setEventsLoading(false))
+  }, [])
+
   const loadZones = useCallback((cameraId: number | string | null) => {
     setZonesLoading(true)
     setZonesError(null)
@@ -79,23 +91,10 @@ function App() {
 
   useEffect(() => {
     if (!authed) return
-    setEventsLoading(true)
-    setEventsError(null)
-    api.get<Array<{ id: number; cameraId: number | null; eventType: string; eventLevel: number; createdAt: string }>>('/safety-events')
-      .then((events) => setSafetyEvents(events.map((event) => {
-        const camera = cameras.find((item) => item.id === event.cameraId)
-        const severity = event.eventLevel === 1 ? 'danger' : event.eventLevel === 2 ? 'warning' : 'info'
-        const title = event.eventType === 'FALL_DETECTED' ? '낙상 감지' : event.eventType
-        return {
-          id: String(event.id), severity, title,
-          description: `${camera?.name ?? '알 수 없는 카메라'}에서 ${title} 이벤트가 감지되었습니다.`,
-          meta: new Date(event.createdAt).toLocaleTimeString(),
-          actionLabel: severity === 'danger' ? '확인' : '상세',
-        }
-      })))
-      .catch(() => setEventsError('이벤트 목록을 불러오지 못했습니다.'))
-      .finally(() => setEventsLoading(false))
-  }, [authed, cameras])
+    loadEvents(true)
+    const interval = setInterval(() => loadEvents(false), EVENTS_POLL_INTERVAL_MS)
+    return () => clearInterval(interval)
+  }, [authed, loadEvents])
 
   useEffect(() => {
     if (!authed) return
@@ -142,6 +141,8 @@ function App() {
       .catch(() => setCamerasError('카메라 삭제에 실패했습니다.'))
   }
 
+  const mappedEvents = safetyEvents.map((event) => mapSafetyEvent(event, cameras))
+
   const isMonitorPage = activeTab === navTabs[0]
   const isCameraManagementPage = activeTab === navTabs[1]
   const isZoneSettingsPage = activeTab === navTabs[2]
@@ -173,7 +174,7 @@ function App() {
               selectedCameraId={selectedCameraId}
               zones={zones}
             />
-            <EventSidebar events={safetyEvents} loading={eventsLoading} error={eventsError} />
+            <EventSidebar events={mappedEvents} loading={eventsLoading} error={eventsError} />
           </div>
           <ControlPanel />
         </>
@@ -207,7 +208,7 @@ function App() {
       ) : isRecordingPage ? (
         <RecordingSearchPage />
       ) : isAnalysisPage ? (
-        <AiAnalysisPage />
+        <AiAnalysisPage cameras={cameras} events={safetyEvents} loading={eventsLoading} error={eventsError} />
       ) : isStatisticsPage ? (
         <StatisticsPage />
       ) : (

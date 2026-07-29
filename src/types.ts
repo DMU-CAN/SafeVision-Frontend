@@ -32,11 +32,6 @@ export interface Camera {
   selected?: boolean
 }
 
-export interface CameraZone {
-  zone: string
-  cameras: Camera[]
-}
-
 export type CameraBoxState = 'normal' | 'active' | 'alert'
 
 export interface CameraBox {
@@ -58,4 +53,14 @@ export interface SafetyEvent {
   description: string
   meta: string
   actionLabel: string
+}
+
+export interface SafetyEventRaw {
+  id: number
+  cameraId: number | null
+  equipmentId: number | null
+  zoneId: number | null
+  eventType: string
+  eventLevel: number
+  createdAt: string
 }
