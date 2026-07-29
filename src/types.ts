@@ -28,6 +28,7 @@ export interface Camera {
   name: string
   status: CameraStatus
   location?: string
+  rtspUrl?: string
   selected?: boolean
 }
 

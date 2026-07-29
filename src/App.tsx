@@ -9,6 +9,8 @@ import { RecordingSearchPage } from './pages/RecordingSearchPage'
 import { AiAnalysisPage } from './pages/AiAnalysisPage'
 import { StatisticsPage } from './pages/StatisticsPage'
 import { LoginPage } from './pages/LoginPage'
+import { CameraManagementPage } from './pages/CameraManagementPage'
+import { ZoneSettingsPage } from './pages/ZoneSettingsPage'
 import './App.css'
 import { api, getStoredUser, isAuthenticated, UNAUTHORIZED_EVENT } from './api/client'
 import type { Camera, SafetyEvent, Zone, ZonePoint } from './types'
@@ -130,10 +132,18 @@ function App() {
       .catch(() => setZonesError('위험 구역 삭제에 실패했습니다.'))
   }
 
+  const handleDeleteCamera = (cameraId: number | string) => {
+    api.delete(`/cameras/${cameraId}`)
+      .then(() => loadCameras())
+      .catch(() => setCamerasError('카메라 삭제에 실패했습니다.'))
+  }
+
   const isMonitorPage = activeTab === navTabs[0]
-  const isRecordingPage = activeTab === navTabs[1]
-  const isAnalysisPage = activeTab === navTabs[2]
-  const isStatisticsPage = activeTab === navTabs[3]
+  const isCameraManagementPage = activeTab === navTabs[1]
+  const isZoneSettingsPage = activeTab === navTabs[2]
+  const isRecordingPage = activeTab === navTabs[3]
+  const isAnalysisPage = activeTab === navTabs[4]
+  const isStatisticsPage = activeTab === navTabs[5]
 
   return (
     <div className="app-shell">
@@ -158,29 +168,38 @@ function App() {
               cameras={cameras}
               selectedCameraId={selectedCameraId}
               zones={zones}
-              zoneEditing={zoneEditing}
-              zoneDraftPoints={zoneDraftPoints}
-              onZonePointAdd={(point) => setZoneDraftPoints((current) => [...current, point])}
             />
             <EventSidebar events={safetyEvents} loading={eventsLoading} error={eventsError} />
           </div>
-          <ControlPanel
-            cameras={cameras}
-            selectedCameraId={selectedCameraId}
-            zones={zones}
-            zonesLoading={zonesLoading}
-            zonesError={zonesError}
-            zoneEditing={zoneEditing}
-            zoneDraftPoints={zoneDraftPoints}
-            onStartZoneEditing={() => { setZoneEditing(true); setZoneDraftPoints([]) }}
-            onUndoZonePoint={() => setZoneDraftPoints((current) => current.slice(0, -1))}
-            onCancelZoneEditing={() => { setZoneEditing(false); setZoneDraftPoints([]) }}
-            onSaveZone={handleSaveZone}
-            onDeleteZone={handleDeleteZone}
-            onRegisterCamera={handleRegisterCamera}
-          />
+          <ControlPanel />
         </>
 
+      ) : isCameraManagementPage ? (
+        <CameraManagementPage
+          cameras={cameras}
+          loading={camerasLoading}
+          error={camerasError}
+          onRegisterCamera={handleRegisterCamera}
+          onDeleteCamera={handleDeleteCamera}
+        />
+      ) : isZoneSettingsPage ? (
+        <ZoneSettingsPage
+          cameras={cameras}
+          camerasLoading={camerasLoading}
+          selectedCameraId={selectedCameraId}
+          onSelectCamera={setSelectedCameraId}
+          zones={zones}
+          zonesLoading={zonesLoading}
+          zonesError={zonesError}
+          zoneEditing={zoneEditing}
+          zoneDraftPoints={zoneDraftPoints}
+          onZonePointAdd={(point) => setZoneDraftPoints((current) => [...current, point])}
+          onStartZoneEditing={() => { setZoneEditing(true); setZoneDraftPoints([]) }}
+          onUndoZonePoint={() => setZoneDraftPoints((current) => current.slice(0, -1))}
+          onCancelZoneEditing={() => { setZoneEditing(false); setZoneDraftPoints([]) }}
+          onSaveZone={handleSaveZone}
+          onDeleteZone={handleDeleteZone}
+        />
       ) : isRecordingPage ? (
         <RecordingSearchPage />
       ) : isAnalysisPage ? (

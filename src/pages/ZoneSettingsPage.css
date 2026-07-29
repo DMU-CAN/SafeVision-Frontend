@@ -1,0 +1,175 @@
+.zone-settings {
+  flex: 1;
+  padding: 24px 32px;
+  overflow-y: auto;
+}
+
+.zone-settings__eyebrow {
+  color: var(--accent-blue);
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+}
+
+.zone-settings h1 {
+  margin: 8px 0 20px;
+  color: var(--text-header);
+  font-size: 24px;
+}
+
+.zone-settings__body {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.zone-settings__camera-list {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.zone-settings__camera-list h2 {
+  margin: 0 0 8px;
+  color: var(--text-header);
+  font-size: 13px;
+}
+
+.zone-settings__camera-item {
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-main);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.zone-settings__camera-item:hover {
+  background: var(--panel-header);
+}
+
+.zone-settings__camera-item--active {
+  background: var(--panel-header);
+  color: var(--accent-blue);
+  font-weight: bold;
+}
+
+.zone-settings__stage {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.zone-settings__video {
+  max-width: 720px;
+}
+
+.zone-settings__controls,
+.zone-settings__list {
+  padding: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.zone-settings__controls button {
+  height: 32px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 4px;
+  background: var(--accent-blue);
+  color: var(--text-header);
+  font-weight: bold;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.zone-settings__editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.zone-settings__editor input {
+  height: 32px;
+  padding: 0 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-main);
+  font-size: 13px;
+  max-width: 240px;
+}
+
+.zone-settings__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.zone-settings__actions button {
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--btn-bg);
+  color: var(--text-main);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.zone-settings__actions button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.zone-settings__list h2 {
+  margin: 0 0 10px;
+  color: var(--text-header);
+  font-size: 13px;
+}
+
+.zone-settings__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-main);
+}
+
+.zone-settings__row:first-of-type {
+  border-top: none;
+}
+
+.zone-settings__row button {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--danger-red);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--danger-red);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.zone-settings__hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.zone-settings__error {
+  margin: 0;
+  color: var(--danger-red);
+  font-size: 12px;
+}
