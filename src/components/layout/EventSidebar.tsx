@@ -9,9 +9,10 @@ interface EventSidebarProps {
   events: SafetyEvent[]
   loading?: boolean
   error?: string | null
+  onPlayClip?: (clipUrl: string) => void
 }
 
-export function EventSidebar({ events, loading, error }: EventSidebarProps) {
+export function EventSidebar({ events, loading, error, onPlayClip }: EventSidebarProps) {
   return <aside className="event-sidebar">
     <div className="event-sidebar__panel-header">실시간 AI 감지 이력 <span className="event-sidebar__badge">NEW {events.length}</span></div>
     <div className="event-sidebar__list">
@@ -21,7 +22,17 @@ export function EventSidebar({ events, loading, error }: EventSidebarProps) {
       {!loading && !error && events.map((event) => <div key={event.id} className={cardClass[event.severity]}>
         <div className={titleClass[event.severity]}>{event.title}</div>
         <p className="event-card__desc">{event.description}</p>
-        <div className="event-card__footer"><span className="event-card__meta">{event.meta}</span><button type="button" className={actionClass[event.severity]}>{event.actionLabel}</button></div>
+        <div className="event-card__footer">
+          <span className="event-card__meta">{event.meta}</span>
+          <button
+            type="button"
+            className={actionClass[event.severity]}
+            disabled={!event.clipUrl}
+            onClick={() => event.clipUrl && onPlayClip?.(event.clipUrl)}
+          >
+            {event.clipUrl ? event.actionLabel : '영상 준비중'}
+          </button>
+        </div>
       </div>)}
     </div>
   </aside>

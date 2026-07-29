@@ -101,6 +101,12 @@
   background: var(--btn-bg);
   color: var(--text-muted);
   font-size: 10px;
+  cursor: pointer;
+}
+
+.event-card__action:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .event-card__action--active {

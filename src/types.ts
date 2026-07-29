@@ -53,6 +53,7 @@ export interface SafetyEvent {
   description: string
   meta: string
   actionLabel: string
+  clipUrl?: string
 }
 
 export interface SafetyEventRaw {
@@ -62,5 +63,6 @@ export interface SafetyEventRaw {
   zoneId: number | null
   eventType: string
   eventLevel: number
+  clipPath: string | null
   createdAt: string
 }

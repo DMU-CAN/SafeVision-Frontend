@@ -17,6 +17,7 @@ import type { Camera, SafetyEventRaw, Zone, ZonePoint } from './types'
 import { ControlPanel } from './components/control/ControlPanel'
 import { closeAllConnections, closeConnection } from './hooks/webrtcManager'
 import { mapSafetyEvent } from './utils/events'
+import { ClipModal } from './components/common/ClipModal'
 
 const EVENTS_POLL_INTERVAL_MS = 8000
 
@@ -43,6 +44,7 @@ function App() {
   const [zonesError, setZonesError] = useState<string | null>(null)
   const [zoneEditing, setZoneEditing] = useState(false)
   const [zoneDraftPoints, setZoneDraftPoints] = useState<ZonePoint[]>([])
+  const [activeClipUrl, setActiveClipUrl] = useState<string | null>(null)
 
   const loadCameras = useCallback(() => {
     setCamerasLoading(true)
@@ -174,7 +176,7 @@ function App() {
               selectedCameraId={selectedCameraId}
               zones={zones}
             />
-            <EventSidebar events={mappedEvents} loading={eventsLoading} error={eventsError} />
+            <EventSidebar events={mappedEvents} loading={eventsLoading} error={eventsError} onPlayClip={setActiveClipUrl} />
           </div>
           <ControlPanel />
         </>
@@ -208,7 +210,7 @@ function App() {
       ) : isRecordingPage ? (
         <RecordingSearchPage />
       ) : isAnalysisPage ? (
-        <AiAnalysisPage cameras={cameras} events={safetyEvents} loading={eventsLoading} error={eventsError} />
+        <AiAnalysisPage cameras={cameras} events={safetyEvents} loading={eventsLoading} error={eventsError} onPlayClip={setActiveClipUrl} />
       ) : isStatisticsPage ? (
         <StatisticsPage />
       ) : (
@@ -218,6 +220,8 @@ function App() {
           <p>이 페이지는 현재 메뉴 구조에 연결되어 있습니다. 세부 기능을 준비 중입니다.</p>
         </main>
       )}
+
+      {activeClipUrl && <ClipModal clipUrl={activeClipUrl} onClose={() => setActiveClipUrl(null)} />}
     </div>
   )
 }

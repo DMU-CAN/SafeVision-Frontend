@@ -8,6 +8,7 @@ interface AiAnalysisPageProps {
   events: SafetyEventRaw[]
   loading?: boolean
   error?: string | null
+  onPlayClip?: (clipUrl: string) => void
 }
 
 interface CameraDetectionRow {
@@ -31,7 +32,7 @@ function isToday(dateString: string): boolean {
   return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate()
 }
 
-export function AiAnalysisPage({ cameras, events, loading, error }: AiAnalysisPageProps) {
+export function AiAnalysisPage({ cameras, events, loading, error, onPlayClip }: AiAnalysisPageProps) {
   const [severity, setSeverity] = useState<'all' | EventSeverity>('all')
 
   const mappedEvents = useMemo(() => events.map((event) => mapSafetyEvent(event, cameras)), [events, cameras])
@@ -112,7 +113,19 @@ export function AiAnalysisPage({ cameras, events, loading, error }: AiAnalysisPa
           </div>
           <div className="analysis-event-list">
             {filteredEvents.length === 0 && <p className="analysis-page__hint">해당하는 이벤트가 없습니다.</p>}
-            {filteredEvents.map((event) => <div className="analysis-event" key={event.id}><span className={`analysis-event__dot analysis-event__dot--${event.severity}`} /><div><b>{event.title}</b><small>{event.description}</small></div><time>{event.meta}</time></div>)}
+            {filteredEvents.map((event) => (
+              <button
+                type="button"
+                className="analysis-event"
+                key={event.id}
+                disabled={!event.clipUrl}
+                onClick={() => event.clipUrl && onPlayClip?.(event.clipUrl)}
+              >
+                <span className={`analysis-event__dot analysis-event__dot--${event.severity}`} />
+                <div><b>{event.title}</b><small>{event.description}</small></div>
+                <time>{event.meta}</time>
+              </button>
+            ))}
           </div>
         </section>
       </div>

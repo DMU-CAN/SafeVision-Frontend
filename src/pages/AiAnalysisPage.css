@@ -23,5 +23,7 @@
 .risk { width: fit-content; padding: 3px 7px; border-radius: 3px; font-size: 10px; }
 .risk--high { background: #3d1d24; color: var(--danger-red); }.risk--medium { background: #3b2e18; color: #f59e0b; }.risk--low { background: #14352d; color: var(--success-green); }
 .analysis-event-list { display: flex; flex-direction: column; }
-.analysis-event { display: grid; grid-template-columns: 9px 1fr auto; align-items: center; gap: 10px; min-height: 56px; border-top: 1px solid var(--border); }
+.analysis-event { display: grid; grid-template-columns: 9px 1fr auto; align-items: center; gap: 10px; min-height: 56px; width: 100%; border: none; border-top: 1px solid var(--border); background: transparent; font-family: inherit; text-align: left; cursor: pointer; }
+.analysis-event:disabled { cursor: default; opacity: 0.6; }
+.analysis-event:not(:disabled):hover { background: var(--panel-header); }
 .analysis-event b { color: var(--text-main); font-size: 11px; }.analysis-event time { color: var(--text-muted); font-size: 10px; }.analysis-event__dot { width: 8px; height: 8px; border-radius: 50%; }.analysis-event__dot--danger { background: var(--danger-red); }.analysis-event__dot--warning { background: #f59e0b; }.analysis-event__dot--info { background: var(--accent-blue); }
