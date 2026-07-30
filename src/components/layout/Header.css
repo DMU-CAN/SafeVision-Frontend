@@ -13,6 +13,7 @@
   align-items: baseline;
   gap: 8px;
   white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .app-header__logo {
@@ -29,9 +30,14 @@
 .app-header__tabs {
   display: flex;
   gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 
 .nav-tab {
+  flex: 0 0 auto;
   height: 28px;
   padding: 0 16px;
   border: none;
@@ -39,6 +45,7 @@
   background: var(--btn-bg);
   color: var(--text-muted);
   font-size: 13px;
+  white-space: nowrap;
 }
 
 .nav-tab--active {
@@ -48,7 +55,7 @@
 }
 
 .app-header__status {
-  margin-left: auto;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 24px;
