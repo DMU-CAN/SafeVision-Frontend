@@ -1,7 +1,19 @@
 import type { User } from '../types'
 import type { StreamTarget } from '../hooks/webrtcManager'
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api/v1'
+// Defaults to whatever host/protocol the page itself was loaded from (LAN IP,
+// external domain, etc.) rather than a fixed IP baked in at build time — a
+// hardcoded internal IP works from the LAN but times out for anyone reaching
+// the frontend through port-forwarding/a public domain, since that address
+// isn't routable from outside the LAN. VITE_API_BASE_URL still overrides this
+// for cases where the backend genuinely lives on a different host (e.g. a
+// local dev machine pointing at a remote Pi backend).
+function computeDefaultApiBaseUrl(): string {
+  const { protocol, hostname } = window.location
+  return `${protocol}//${hostname}:8080/api/v1`
+}
+
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || computeDefaultApiBaseUrl()
 export const UNAUTHORIZED_EVENT = 'sv:unauthorized'
 
 type ApiEnvelope<T> = { success: boolean; data: T; message?: string }
