@@ -55,6 +55,49 @@
   color: var(--text-header);
 }
 
+.timeshift-control {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 15px;
+  background: #181b26;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.timeshift-control__label {
+  flex: 0 0 auto;
+  min-width: 56px;
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.timeshift-control input[type="range"] {
+  flex: 1;
+  min-width: 0;
+}
+
+.timeshift-control__scale-label {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.timeshift-control__live-btn {
+  flex: 0 0 auto;
+  height: 24px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 4px;
+  background: var(--accent-blue);
+  color: var(--text-header);
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 .timeline-panel {
   display: flex;
   align-items: center;

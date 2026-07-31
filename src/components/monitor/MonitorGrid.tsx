@@ -28,6 +28,7 @@ interface MonitorGridProps {
 
 export function MonitorGrid({ cameras, selectedCameraId, zones, zoneEditing, zoneDraftPoints, onZonePointAdd, events, onPlayClip }: MonitorGridProps) {
   const [layout, setLayout] = useState('3x3')
+  const [timeshiftMinutesAgo, setTimeshiftMinutesAgo] = useState(0)
   const now = new Date()
   const nowPercent = (minutesSinceMidnight(now) / 1440) * 100
   const todaysEvents = (events ?? []).filter((event) => event.cameraId === selectedCameraId && isToday(new Date(event.createdAt), now))
@@ -44,12 +45,28 @@ export function MonitorGrid({ cameras, selectedCameraId, zones, zoneEditing, zon
             zoneDraftPoints={isSelected ? zoneDraftPoints : undefined}
             existingZones={isSelected ? zones?.filter((zone) => zone.cameraId === camera.id).map((zone) => zone.points) : undefined}
             onZonePointAdd={isSelected ? onZonePointAdd : undefined}
+            timeshiftMinutesAgo={isSelected ? timeshiftMinutesAgo : undefined}
           />
         )
       })}
     </div>
     <div className="layout-switcher"><span className="layout-switcher__label">화면 분할:</span>
       {layoutOptions.map((option) => <button key={option} type="button" className={option === layout ? 'layout-switcher__btn layout-switcher__btn--active' : 'layout-switcher__btn'} onClick={() => setLayout(option)}>{option}</button>)}
+    </div>
+    <div className="timeshift-control">
+      <span className="timeshift-control__label">{timeshiftMinutesAgo === 0 ? '● 실시간' : `${timeshiftMinutesAgo}분 전`}</span>
+      <input
+        type="range"
+        min={0}
+        max={30}
+        step={1}
+        value={timeshiftMinutesAgo}
+        onChange={(event) => setTimeshiftMinutesAgo(Number(event.target.value))}
+      />
+      <span className="timeshift-control__scale-label">30분 전</span>
+      {timeshiftMinutesAgo > 0 && (
+        <button type="button" className="timeshift-control__live-btn" onClick={() => setTimeshiftMinutesAgo(0)}>라이브로</button>
+      )}
     </div>
     <div className="timeline-panel">
       <div className="timeline-bar">

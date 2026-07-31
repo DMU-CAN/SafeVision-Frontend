@@ -1,6 +1,7 @@
 import type { MouseEvent } from 'react'
 import type { CameraBox, ZonePoint } from '../../types'
 import { useWebRTCStream } from '../../hooks/useWebRTCStream'
+import { API_BASE_URL } from '../../api/client'
 import './CameraGridBox.css'
 
 interface CameraGridBoxProps {
@@ -11,14 +12,19 @@ interface CameraGridBoxProps {
   onZonePointAdd?: (point: ZonePoint) => void
   yoloEnabled?: boolean
   robotId?: number
+  /** > 0 switches this box from the live WebRTC stream to a generated clip
+   * covering from this many minutes ago up to now (see cameras/{id}/timeshift). */
+  timeshiftMinutesAgo?: number
 }
 
-export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones, onZonePointAdd, yoloEnabled = true, robotId }: CameraGridBoxProps) {
+export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones, onZonePointAdd, yoloEnabled = true, robotId, timeshiftMinutesAgo }: CameraGridBoxProps) {
   const cameraId = Number(box.id)
+  const isTimeshift = !!timeshiftMinutesAgo && timeshiftMinutesAgo > 0
   const target = robotId !== undefined
     ? { kind: 'robot' as const, robotId }
-    : Number.isFinite(cameraId) ? { kind: 'camera' as const, cameraId, yoloEnabled } : undefined
+    : (!isTimeshift && Number.isFinite(cameraId)) ? { kind: 'camera' as const, cameraId, yoloEnabled } : undefined
   const { videoRef, status } = useWebRTCStream(target)
+  const timeshiftUrl = isTimeshift ? `${API_BASE_URL}/cameras/${cameraId}/timeshift?minutesAgo=${timeshiftMinutesAgo}` : undefined
 
   const handleZoneClick = (event: MouseEvent<SVGSVGElement>) => {
     if (!zoneEditing || !onZonePointAdd) return
@@ -58,18 +64,28 @@ export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones
         )}
       </div>
 
-      <video
-        className="camera-box__stream"
-        ref={videoRef}
-        autoPlay
-        playsInline
-        muted
-      />
+      {isTimeshift ? (
+        <video
+          key={timeshiftUrl}
+          className="camera-box__stream"
+          src={timeshiftUrl}
+          controls
+          autoPlay
+        />
+      ) : (
+        <video
+          className="camera-box__stream"
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+        />
+      )}
 
-      {status === 'connecting' && (
+      {!isTimeshift && status === 'connecting' && (
         <div className="camera-box__overlay">연결 중...</div>
       )}
-      {status === 'error' && (
+      {!isTimeshift && status === 'error' && (
         <div className="camera-box__overlay camera-box__overlay--error">영상 연결 실패</div>
       )}
 
