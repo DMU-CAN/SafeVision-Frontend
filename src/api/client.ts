@@ -39,6 +39,15 @@ export function isAuthenticated() {
   return !!accessToken
 }
 
+// For <video>/<img> src="..." requests (timeshift clips, event clips) that
+// can't set an Authorization header — the backend accepts the token as an
+// ?access_token= query param for exactly this case (see app/api/deps.py).
+export function withAccessToken(url: string): string {
+  if (!accessToken) return url
+  const separator = url.includes('?') ? '&' : '?'
+  return `${url}${separator}access_token=${encodeURIComponent(accessToken)}`
+}
+
 export function getStoredUser(): User | null {
   const raw = localStorage.getItem('user')
   if (!raw) return null

@@ -1,7 +1,7 @@
 import { useRef, useState, type MouseEvent } from 'react'
 import { layoutOptions } from '../../data/mockData'
 import type { Camera, SafetyEventRaw, Zone, ZonePoint } from '../../types'
-import { API_BASE_URL } from '../../api/client'
+import { API_BASE_URL, withAccessToken } from '../../api/client'
 import { CameraGridBox } from './CameraGridBox'
 import './MonitorGrid.css'
 
@@ -70,7 +70,7 @@ export function MonitorGrid({ cameras, selectedCameraId, zones, zoneEditing, zon
         <div className="timeline-bar__track" ref={trackRef} onClick={handleTrackClick}>
           <div className="timeline-bar__playhead" style={{ left: `${percentForMinutesAgo(timeshiftMinutesAgo)}%` }} />
           {recentEvents.map((event) => {
-            const clipUrl = `${API_BASE_URL}/safety-events/${event.id}/clip`
+            const clipUrl = withAccessToken(`${API_BASE_URL}/safety-events/${event.id}/clip`)
             const ageMinutes = (now.getTime() - new Date(event.createdAt).getTime()) / 60000
             return (
               <button

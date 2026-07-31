@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react'
 import type { CameraBox, ZonePoint } from '../../types'
 import { useWebRTCStream } from '../../hooks/useWebRTCStream'
-import { API_BASE_URL } from '../../api/client'
+import { API_BASE_URL, withAccessToken } from '../../api/client'
 import './CameraGridBox.css'
 
 interface CameraGridBoxProps {
@@ -33,7 +33,7 @@ export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones
     ? { kind: 'robot' as const, robotId }
     : (!isTimeshift && Number.isFinite(cameraId)) ? { kind: 'camera' as const, cameraId, yoloEnabled } : undefined
   const { videoRef, status } = useWebRTCStream(target)
-  const timeshiftUrl = isTimeshift ? `${API_BASE_URL}/cameras/${cameraId}/timeshift?minutesAgo=${timeshiftMinutesAgo}` : undefined
+  const timeshiftUrl = isTimeshift ? withAccessToken(`${API_BASE_URL}/cameras/${cameraId}/timeshift?minutesAgo=${timeshiftMinutesAgo}`) : undefined
 
   // object-fit: contain letterboxes the video inside the box whenever the
   // video's native aspect ratio doesn't match the box's — without this, the

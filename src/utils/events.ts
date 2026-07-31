@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../api/client'
+import { API_BASE_URL, withAccessToken } from '../api/client'
 import type { Camera, EventSeverity, SafetyEvent, SafetyEventRaw } from '../types'
 
 export function eventSeverity(eventLevel: number): EventSeverity {
@@ -25,6 +25,6 @@ export function mapSafetyEvent(event: SafetyEventRaw, cameras: Camera[]): Safety
     description: `${camera?.name ?? '알 수 없는 카메라'}에서 ${title} 이벤트가 감지되었습니다.`,
     meta: new Date(event.createdAt).toLocaleTimeString(),
     actionLabel: severity === 'danger' ? '확인' : '상세',
-    clipUrl: event.clipPath ? `${API_BASE_URL}/safety-events/${event.id}/clip` : undefined,
+    clipUrl: event.clipPath ? withAccessToken(`${API_BASE_URL}/safety-events/${event.id}/clip`) : undefined,
   }
 }
