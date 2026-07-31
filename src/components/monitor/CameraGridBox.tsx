@@ -34,6 +34,7 @@ export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones
     : (!isTimeshift && Number.isFinite(cameraId)) ? { kind: 'camera' as const, cameraId, yoloEnabled } : undefined
   const { videoRef, status } = useWebRTCStream(target)
   const timeshiftUrl = isTimeshift ? withAccessToken(`${API_BASE_URL}/cameras/${cameraId}/timeshift?minutesAgo=${timeshiftMinutesAgo}`) : undefined
+  const [timeshiftError, setTimeshiftError] = useState(false)
 
   // object-fit: contain letterboxes the video inside the box whenever the
   // video's native aspect ratio doesn't match the box's — without this, the
@@ -45,6 +46,7 @@ export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones
   const [contentRect, setContentRect] = useState<ContentRect>(FULL_RECT)
 
   useEffect(() => {
+    setTimeshiftError(false)
     const boxEl = boxRef.current
     const videoEl = activeVideoRef.current
     if (!boxEl || !videoEl) return
@@ -128,6 +130,9 @@ export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones
           src={timeshiftUrl}
           controls
           autoPlay
+          muted
+          preload="auto"
+          onError={() => setTimeshiftError(true)}
         />
       ) : (
         <video
@@ -144,6 +149,10 @@ export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones
       )}
       {!isTimeshift && status === 'error' && (
         <div className="camera-box__overlay camera-box__overlay--error">영상 연결 실패</div>
+      )}
+
+      {isTimeshift && timeshiftError && (
+        <div className="camera-box__overlay camera-box__overlay--error">Playback failed</div>
       )}
 
       {(zoneEditing || (existingZones && existingZones.length > 0)) && (
