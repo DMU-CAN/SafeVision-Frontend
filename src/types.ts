@@ -13,12 +13,15 @@ export interface ZonePoint {
   y: number
 }
 
+export type ZoneType = 'DANGER' | 'RESTRICTED' | 'WORK' | 'OBSERVATION'
+
 export interface Zone {
   id: number
   name: string
   cameraId: number | null
   points: ZonePoint[]
   isActive: boolean
+  zoneType: ZoneType
 }
 
 export type CameraStatus = 'online' | 'offline' | 'maintenance' | 'alert'

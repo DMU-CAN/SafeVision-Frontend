@@ -14,7 +14,7 @@ import { ZoneSettingsPage } from './pages/ZoneSettingsPage'
 import { FieldRobotPage } from './pages/FieldRobotPage'
 import './App.css'
 import { api, getStoredUser, isAuthenticated, UNAUTHORIZED_EVENT } from './api/client'
-import type { Camera, ControlProtocol, Equipment, Robot, SafetyEventRaw, Zone, ZonePoint } from './types'
+import type { Camera, ControlProtocol, Equipment, Robot, SafetyEventRaw, Zone, ZonePoint, ZoneType } from './types'
 import { ControlPanel } from './components/control/ControlPanel'
 import { closeAllConnections, closeConnection } from './hooks/webrtcManager'
 import { mapSafetyEvent } from './utils/events'
@@ -160,9 +160,9 @@ function App() {
       .catch(() => setEquipmentsError('설비 삭제에 실패했습니다.'))
   }
 
-  const handleSaveZone = (name: string) => {
+  const handleSaveZone = (name: string, zoneType: ZoneType) => {
     if (!selectedCameraId || zoneDraftPoints.length < 3) return
-    api.post('/zones', { name, cameraId: selectedCameraId, points: zoneDraftPoints })
+    api.post('/zones', { name, cameraId: selectedCameraId, points: zoneDraftPoints, zoneType })
       .then(() => {
         setZoneEditing(false)
         setZoneDraftPoints([])

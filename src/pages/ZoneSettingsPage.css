@@ -110,6 +110,23 @@
   max-width: 240px;
 }
 
+.zone-settings__editor select {
+  height: 32px;
+  padding: 0 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-main);
+  font-size: 13px;
+  max-width: 240px;
+}
+
+.zone-settings__type {
+  margin-left: 6px;
+  color: var(--text-muted);
+  font-weight: normal;
+}
+
 .zone-settings__actions {
   display: flex;
   gap: 8px;

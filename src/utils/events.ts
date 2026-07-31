@@ -10,6 +10,7 @@ export function eventSeverity(eventLevel: number): EventSeverity {
 export function eventTitle(eventType: string): string {
   if (eventType === 'FALL_DETECTED') return '낙상 감지'
   if (eventType === 'ZONE_INTRUSION') return '위험구역 접근'
+  if (eventType === 'CAMERA_ANGLE_CHANGED') return '카메라 각도 변경'
   return eventType
 }
 

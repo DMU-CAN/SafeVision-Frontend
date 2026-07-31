@@ -1,7 +1,14 @@
 import { useState } from 'react'
-import type { Camera, Zone, ZonePoint } from '../types'
+import type { Camera, Zone, ZonePoint, ZoneType } from '../types'
 import { CameraGridBox } from '../components/monitor/CameraGridBox'
 import './ZoneSettingsPage.css'
+
+const ZONE_TYPE_LABELS: Record<ZoneType, string> = {
+  DANGER: '위험구역',
+  RESTRICTED: '출입금지',
+  WORK: '작업구역',
+  OBSERVATION: '관찰구역',
+}
 
 interface ZoneSettingsPageProps {
   cameras: Camera[]
@@ -17,7 +24,7 @@ interface ZoneSettingsPageProps {
   onStartZoneEditing: () => void
   onUndoZonePoint: () => void
   onCancelZoneEditing: () => void
-  onSaveZone: (name: string) => void
+  onSaveZone: (name: string, zoneType: ZoneType) => void
   onDeleteZone: (zoneId: number) => void
 }
 
@@ -27,6 +34,7 @@ export function ZoneSettingsPage({
   zoneEditing, zoneDraftPoints, onZonePointAdd, onStartZoneEditing, onUndoZonePoint, onCancelZoneEditing, onSaveZone, onDeleteZone,
 }: ZoneSettingsPageProps) {
   const [zoneName, setZoneName] = useState('위험 구역')
+  const [zoneType, setZoneType] = useState<ZoneType>('DANGER')
   const selectedCamera = cameras.find((camera) => camera.id === selectedCameraId)
   const cameraZones = zones.filter((zone) => zone.cameraId === selectedCameraId)
 
@@ -74,9 +82,14 @@ export function ZoneSettingsPage({
                   <div className="zone-settings__editor">
                     <p className="zone-settings__hint">영상을 클릭해서 점을 찍으세요 ({zoneDraftPoints.length}개 / 최소 3개)</p>
                     <input value={zoneName} onChange={(event) => setZoneName(event.target.value)} placeholder="구역 이름" />
+                    <select value={zoneType} onChange={(event) => setZoneType(event.target.value as ZoneType)}>
+                      {(Object.keys(ZONE_TYPE_LABELS) as ZoneType[]).map((type) => (
+                        <option key={type} value={type}>{ZONE_TYPE_LABELS[type]}</option>
+                      ))}
+                    </select>
                     <div className="zone-settings__actions">
                       <button type="button" onClick={onUndoZonePoint} disabled={zoneDraftPoints.length === 0}>마지막 점 취소</button>
-                      <button type="button" onClick={() => zoneDraftPoints.length >= 3 && onSaveZone(zoneName)} disabled={zoneDraftPoints.length < 3}>구역 저장</button>
+                      <button type="button" onClick={() => zoneDraftPoints.length >= 3 && onSaveZone(zoneName, zoneType)} disabled={zoneDraftPoints.length < 3}>구역 저장</button>
                       <button type="button" onClick={onCancelZoneEditing}>취소</button>
                     </div>
                   </div>
@@ -90,7 +103,7 @@ export function ZoneSettingsPage({
                 {!zonesLoading && !zonesError && cameraZones.length === 0 && <p className="zone-settings__hint">등록된 위험 구역이 없습니다.</p>}
                 {!zonesLoading && !zonesError && cameraZones.map((zone) => (
                   <div className="zone-settings__row" key={zone.id}>
-                    <span>{zone.name}</span>
+                    <span>{zone.name} <small className="zone-settings__type">{ZONE_TYPE_LABELS[zone.zoneType]}</small></span>
                     <button type="button" onClick={() => onDeleteZone(zone.id)}>삭제</button>
                   </div>
                 ))}
