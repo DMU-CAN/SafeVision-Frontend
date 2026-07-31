@@ -109,10 +109,10 @@
 }
 
 .camera-box__zone-layer {
+  /* top/left/width/height are set inline per-instance to match the actual
+     letterboxed video content rect (see CameraGridBox.tsx) rather than
+     always filling the whole box. */
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
   z-index: 1;
 }
 

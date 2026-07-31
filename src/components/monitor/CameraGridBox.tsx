@@ -1,4 +1,4 @@
-import type { MouseEvent } from 'react'
+import { useEffect, useRef, useState, type MouseEvent } from 'react'
 import type { CameraBox, ZonePoint } from '../../types'
 import { useWebRTCStream } from '../../hooks/useWebRTCStream'
 import { API_BASE_URL } from '../../api/client'
@@ -17,6 +17,15 @@ interface CameraGridBoxProps {
   timeshiftMinutesAgo?: number
 }
 
+interface ContentRect {
+  top: number
+  left: number
+  width: number
+  height: number
+}
+
+const FULL_RECT: ContentRect = { top: 0, left: 0, width: 100, height: 100 }
+
 export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones, onZonePointAdd, yoloEnabled = true, robotId, timeshiftMinutesAgo }: CameraGridBoxProps) {
   const cameraId = Number(box.id)
   const isTimeshift = !!timeshiftMinutesAgo && timeshiftMinutesAgo > 0
@@ -25,6 +34,53 @@ export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones
     : (!isTimeshift && Number.isFinite(cameraId)) ? { kind: 'camera' as const, cameraId, yoloEnabled } : undefined
   const { videoRef, status } = useWebRTCStream(target)
   const timeshiftUrl = isTimeshift ? `${API_BASE_URL}/cameras/${cameraId}/timeshift?minutesAgo=${timeshiftMinutesAgo}` : undefined
+
+  // object-fit: contain letterboxes the video inside the box whenever the
+  // video's native aspect ratio doesn't match the box's — without this, the
+  // zone overlay (which always fills the whole box) draws points/polygons
+  // over the letterbox bars instead of over the actual picture, so clicks
+  // and saved zone coordinates drift off from where they visually appear.
+  const boxRef = useRef<HTMLDivElement>(null)
+  const activeVideoRef = useRef<HTMLVideoElement>(null)
+  const [contentRect, setContentRect] = useState<ContentRect>(FULL_RECT)
+
+  useEffect(() => {
+    const boxEl = boxRef.current
+    const videoEl = activeVideoRef.current
+    if (!boxEl || !videoEl) return
+
+    const recompute = () => {
+      const { videoWidth, videoHeight } = videoEl
+      const { clientWidth: boxWidth, clientHeight: boxHeight } = boxEl
+      if (!videoWidth || !videoHeight || !boxWidth || !boxHeight) {
+        setContentRect(FULL_RECT)
+        return
+      }
+      const boxRatio = boxWidth / boxHeight
+      const videoRatio = videoWidth / videoHeight
+      if (videoRatio > boxRatio) {
+        // Video relatively wider than the box: full width, letterboxed top/bottom.
+        const heightPercent = (boxRatio / videoRatio) * 100
+        setContentRect({ top: (100 - heightPercent) / 2, left: 0, width: 100, height: heightPercent })
+      } else {
+        // Video relatively taller than the box: full height, pillarboxed left/right.
+        const widthPercent = (videoRatio / boxRatio) * 100
+        setContentRect({ top: 0, left: (100 - widthPercent) / 2, width: widthPercent, height: 100 })
+      }
+    }
+
+    recompute()
+    videoEl.addEventListener('loadedmetadata', recompute)
+    videoEl.addEventListener('resize', recompute)
+    const resizeObserver = new ResizeObserver(recompute)
+    resizeObserver.observe(boxEl)
+
+    return () => {
+      videoEl.removeEventListener('loadedmetadata', recompute)
+      videoEl.removeEventListener('resize', recompute)
+      resizeObserver.disconnect()
+    }
+  }, [isTimeshift, timeshiftUrl])
 
   const handleZoneClick = (event: MouseEvent<SVGSVGElement>) => {
     if (!zoneEditing || !onZonePointAdd) return
@@ -48,7 +104,7 @@ export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones
         : 'camera-box__label'
 
   return (
-    <div className={boxClass}>
+    <div className={boxClass} ref={boxRef}>
       <div className="camera-box__header">
         <span className={labelClass}>{box.label}</span>
         {box.badge && (
@@ -68,6 +124,7 @@ export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones
         <video
           key={timeshiftUrl}
           className="camera-box__stream"
+          ref={activeVideoRef}
           src={timeshiftUrl}
           controls
           autoPlay
@@ -75,7 +132,7 @@ export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones
       ) : (
         <video
           className="camera-box__stream"
-          ref={videoRef}
+          ref={(el) => { videoRef.current = el; activeVideoRef.current = el }}
           autoPlay
           playsInline
           muted
@@ -92,6 +149,12 @@ export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones
       {(zoneEditing || (existingZones && existingZones.length > 0)) && (
         <svg
           className={zoneEditing ? 'camera-box__zone-layer camera-box__zone-layer--editing' : 'camera-box__zone-layer'}
+          style={{
+            top: `${contentRect.top}%`,
+            left: `${contentRect.left}%`,
+            width: `${contentRect.width}%`,
+            height: `${contentRect.height}%`,
+          }}
           viewBox="0 0 1000 600"
           preserveAspectRatio="none"
           onClick={handleZoneClick}
