@@ -122,6 +122,10 @@ export function CameraGridBox({ box, zoneEditing, zoneDraftPoints, existingZones
         )}
       </div>
 
+      {isTimeshift && (
+        <div className="camera-box__replay-badge">{timeshiftMinutesAgo}분 전 재생</div>
+      )}
+
       {isTimeshift ? (
         <video
           key={timeshiftUrl}
