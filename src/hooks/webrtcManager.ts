@@ -22,8 +22,25 @@ interface Connection {
 
 const connections = new Map<string, Connection>()
 
+const TURN_ENABLED = import.meta.env.VITE_TURN_ENABLED === 'true'
+const TURN_URL = import.meta.env.VITE_TURN_URL || 'turn:safevision.kro.kr:3478?transport=tcp'
+const TURN_USERNAME = import.meta.env.VITE_TURN_USERNAME || 'safevision'
+const TURN_CREDENTIAL = import.meta.env.VITE_TURN_CREDENTIAL || 'change-this-password'
+
 function notify(conn: Connection) {
   conn.listeners.forEach((listener) => listener())
+}
+
+function createPeerConnection(): RTCPeerConnection {
+  if (!TURN_ENABLED) return new RTCPeerConnection()
+
+  return new RTCPeerConnection({
+    iceServers: [{
+      urls: TURN_URL,
+      username: TURN_USERNAME,
+      credential: TURN_CREDENTIAL,
+    }],
+  })
 }
 
 async function connect(target: StreamTarget, conn: Connection) {
@@ -64,7 +81,7 @@ export function getConnection(target: StreamTarget): Connection {
   const key = streamTargetKey(target)
   const existing = connections.get(key)
   if (existing) return existing
-  const conn: Connection = { pc: new RTCPeerConnection(), stream: null, status: 'connecting', listeners: new Set() }
+  const conn: Connection = { pc: createPeerConnection(), stream: null, status: 'connecting', listeners: new Set() }
   connections.set(key, conn)
   connect(target, conn)
   return conn
