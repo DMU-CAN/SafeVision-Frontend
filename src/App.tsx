@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Header } from './components/layout/Header'
 import { CameraSidebar } from './components/layout/CameraSidebar'
 import { MonitorGrid } from './components/monitor/MonitorGrid'
@@ -14,96 +14,30 @@ import { ZoneSettingsPage } from './pages/ZoneSettingsPage'
 import { FieldRobotPage } from './pages/FieldRobotPage'
 import './App.css'
 import { api, getStoredUser, isAuthenticated, UNAUTHORIZED_EVENT } from './api/client'
-import type { Camera, ControlProtocol, Equipment, Robot, SafetyEventRaw, Zone, ZonePoint, ZoneType } from './types'
+import type { ZonePoint, ZoneType } from './types'
 import { ControlPanel } from './components/control/ControlPanel'
 import { closeAllConnections, closeConnection } from './hooks/webrtcManager'
 import { mapSafetyEvent } from './utils/events'
 import { ClipModal } from './components/common/ClipModal'
-
-const EVENTS_POLL_INTERVAL_MS = 8000
-
-function normalizeCameraStatus(status: string): Camera['status'] {
-  if (status === 'ONLINE') return 'online'
-  if (status === 'OFFLINE') return 'offline'
-  if (status === 'MAINTENANCE') return 'maintenance'
-  return 'offline'
-}
+import { useCameras } from './hooks/useCameras'
+import { useRobots } from './hooks/useRobots'
+import { useEquipments } from './hooks/useEquipments'
+import { useSafetyEvents } from './hooks/useSafetyEvents'
+import { useZones } from './hooks/useZones'
 
 function App() {
   const now = useClock()
   const [authed, setAuthed] = useState(isAuthenticated)
   const [activeTab, setActiveTab] = useState(navTabs[0])
-  const [cameras, setCameras] = useState<Camera[]>([])
-  const [camerasLoading, setCamerasLoading] = useState(true)
-  const [camerasError, setCamerasError] = useState<string | null>(null)
-  const [robots, setRobots] = useState<Robot[]>([])
-  const [robotsLoading, setRobotsLoading] = useState(true)
-  const [robotsError, setRobotsError] = useState<string | null>(null)
-  const [equipments, setEquipments] = useState<Equipment[]>([])
-  const [equipmentsLoading, setEquipmentsLoading] = useState(true)
-  const [equipmentsError, setEquipmentsError] = useState<string | null>(null)
-  const [safetyEvents, setSafetyEvents] = useState<SafetyEventRaw[]>([])
-  const [eventsLoading, setEventsLoading] = useState(true)
-  const [eventsError, setEventsError] = useState<string | null>(null)
   const [selectedCameraId, setSelectedCameraId] = useState<number | string | null>(null)
-  const [zones, setZones] = useState<Zone[]>([])
-  const [zonesLoading, setZonesLoading] = useState(false)
-  const [zonesError, setZonesError] = useState<string | null>(null)
   const [zoneEditing, setZoneEditing] = useState(false)
   const [zoneDraftPoints, setZoneDraftPoints] = useState<ZonePoint[]>([])
   const [activeClipUrl, setActiveClipUrl] = useState<string | null>(null)
-
-  const loadCameras = useCallback(() => {
-    setCamerasLoading(true)
-    setCamerasError(null)
-    return api.get<{ items: Camera[] }>('/cameras')
-      .then((data) => {
-        const normalized = data.items.map((camera) => ({
-          ...camera,
-          status: normalizeCameraStatus(camera.status),
-        }))
-        setCameras(normalized)
-        setSelectedCameraId((current) => current ?? normalized[0]?.id ?? null)
-      })
-      .catch(() => setCamerasError('카메라 목록을 불러오지 못했습니다.'))
-      .finally(() => setCamerasLoading(false))
-  }, [])
-
-  const loadRobots = useCallback(() => {
-    setRobotsLoading(true)
-    setRobotsError(null)
-    return api.get<{ items: Robot[] }>('/robots')
-      .then((data) => setRobots(data.items))
-      .catch(() => setRobotsError('로봇 목록을 불러오지 못했습니다.'))
-      .finally(() => setRobotsLoading(false))
-  }, [])
-
-  const loadEquipments = useCallback(() => {
-    setEquipmentsLoading(true)
-    setEquipmentsError(null)
-    return api.get<{ items: Equipment[] }>('/equipments')
-      .then((data) => setEquipments(data.items))
-      .catch(() => setEquipmentsError('설비 목록을 불러오지 못했습니다.'))
-      .finally(() => setEquipmentsLoading(false))
-  }, [])
-
-  const loadEvents = useCallback((showLoading: boolean) => {
-    if (showLoading) setEventsLoading(true)
-    setEventsError(null)
-    return api.get<SafetyEventRaw[]>('/safety-events?limit=200')
-      .then(setSafetyEvents)
-      .catch(() => setEventsError('이벤트 목록을 불러오지 못했습니다.'))
-      .finally(() => setEventsLoading(false))
-  }, [])
-
-  const loadZones = useCallback((cameraId: number | string | null) => {
-    setZonesLoading(true)
-    setZonesError(null)
-    return api.get<Zone[]>(cameraId ? `/zones?cameraId=${cameraId}` : '/zones')
-      .then(setZones)
-      .catch(() => setZonesError('위험 구역 목록을 불러오지 못했습니다.'))
-      .finally(() => setZonesLoading(false))
-  }, [])
+  const { cameras, camerasLoading, camerasError, loadCameras, registerCamera, deleteCamera } = useCameras()
+  const { robots, robotsLoading, robotsError, loadRobots, registerRobot, deleteRobot } = useRobots()
+  const { equipments, equipmentsLoading, equipmentsError, loadEquipments, registerEquipment, deleteEquipment } = useEquipments()
+  const { safetyEvents, eventsLoading, eventsError } = useSafetyEvents(authed)
+  const { zones, zonesLoading, zonesError, loadZones, saveZone, deleteZone } = useZones()
 
   useEffect(() => {
     const handleUnauthorized = () => setAuthed(false)
@@ -113,17 +47,10 @@ function App() {
 
   useEffect(() => {
     if (!authed) return
-    loadCameras()
+    loadCameras().then((normalized) => setSelectedCameraId((current) => current ?? normalized[0]?.id ?? null))
     loadRobots()
     loadEquipments()
   }, [authed, loadCameras, loadRobots, loadEquipments])
-
-  useEffect(() => {
-    if (!authed) return
-    loadEvents(true)
-    const interval = setInterval(() => loadEvents(false), EVENTS_POLL_INTERVAL_MS)
-    return () => clearInterval(interval)
-  }, [authed, loadEvents])
 
   useEffect(() => {
     if (!authed) return
@@ -139,60 +66,31 @@ function App() {
   const user = getStoredUser()
   const handleLogout = () => { closeAllConnections(); api.logout().finally(() => setAuthed(false)) }
 
-  const handleRegisterCamera = async (payload: { name: string; rtspUrl: string; location: string; locationX?: number; locationY?: number }) => {
-    await api.post('/cameras', payload)
-    await loadCameras()
-  }
-
-  const handleRegisterRobot = async (payload: { name: string; controlAddress: string; cameraRtspUrl: string; locationX?: number; locationY?: number }) => {
-    await api.post('/robots', payload)
-    await loadRobots()
-  }
-
-  const handleRegisterEquipment = async (payload: { name: string; controlProtocol: ControlProtocol; controlAddress: string }) => {
-    await api.post('/equipments', payload)
-    await loadEquipments()
-  }
-
-  const handleDeleteEquipment = (equipmentId: number) => {
-    api.delete(`/equipments/${equipmentId}`)
-      .then(() => loadEquipments())
-      .catch(() => setEquipmentsError('설비 삭제에 실패했습니다.'))
-  }
-
   const handleSaveZone = (name: string, zoneType: ZoneType) => {
     if (!selectedCameraId || zoneDraftPoints.length < 3) return
-    api.post('/zones', { name, cameraId: selectedCameraId, points: zoneDraftPoints, zoneType })
+    saveZone({ name, cameraId: selectedCameraId, points: zoneDraftPoints, zoneType })
       .then(() => {
         setZoneEditing(false)
         setZoneDraftPoints([])
-        return loadZones(selectedCameraId)
       })
-      .catch(() => setZonesError('위험 구역 저장에 실패했습니다.'))
   }
 
   const handleDeleteZone = (zoneId: number) => {
-    api.delete(`/zones/${zoneId}`)
-      .then(() => loadZones(selectedCameraId))
-      .catch(() => setZonesError('위험 구역 삭제에 실패했습니다.'))
+    deleteZone(zoneId, selectedCameraId)
   }
 
   const handleDeleteCamera = (cameraId: number | string) => {
-    api.delete(`/cameras/${cameraId}`)
+    deleteCamera(cameraId)
       .then(() => {
         if (typeof cameraId === 'number') closeConnection({ kind: 'camera', cameraId })
-        return loadCameras()
       })
-      .catch(() => setCamerasError('카메라 삭제에 실패했습니다.'))
   }
 
   const handleDeleteRobot = (robotId: number) => {
-    api.delete(`/robots/${robotId}`)
+    deleteRobot(robotId)
       .then(() => {
         closeConnection({ kind: 'robot', robotId })
-        return loadRobots()
       })
-      .catch(() => setRobotsError('로봇 삭제에 실패했습니다.'))
   }
 
   const mappedEvents = safetyEvents.map((event) => mapSafetyEvent(event, cameras))
@@ -241,18 +139,18 @@ function App() {
           cameras={cameras}
           camerasLoading={camerasLoading}
           camerasError={camerasError}
-          onRegisterCamera={handleRegisterCamera}
+          onRegisterCamera={registerCamera}
           onDeleteCamera={handleDeleteCamera}
           robots={robots}
           robotsLoading={robotsLoading}
           robotsError={robotsError}
-          onRegisterRobot={handleRegisterRobot}
+          onRegisterRobot={registerRobot}
           onDeleteRobot={handleDeleteRobot}
           equipments={equipments}
           equipmentsLoading={equipmentsLoading}
           equipmentsError={equipmentsError}
-          onRegisterEquipment={handleRegisterEquipment}
-          onDeleteEquipment={handleDeleteEquipment}
+          onRegisterEquipment={registerEquipment}
+          onDeleteEquipment={deleteEquipment}
         />
       ) : isZoneSettingsPage ? (
         <ZoneSettingsPage
