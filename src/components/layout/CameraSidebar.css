@@ -1,6 +1,7 @@
 .camera-sidebar {
   width: 220px;
   flex: 0 0 220px;
+  max-height: calc(100vh - 220px);
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -42,6 +43,8 @@
 }
 
 .camera-sidebar__tree {
+  flex: 1;
+  min-height: 0;
   padding: 12px 10px;
   overflow-y: auto;
 }
@@ -51,10 +54,17 @@
 }
 
 .camera-zone__title {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
   color: var(--text-main);
   font-size: 13px;
   font-weight: bold;
   margin-bottom: 6px;
+  padding: 0;
+  cursor: pointer;
 }
 
 .camera-row {

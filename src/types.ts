@@ -58,6 +58,16 @@ export interface RobotDispatch {
   dispatchedAt: string
 }
 
+export type ControlProtocol = 'SERIAL' | 'NETWORK'
+
+export interface Equipment {
+  id: number
+  name: string
+  controlProtocol: ControlProtocol
+  controlAddress: string
+  updatedAt: string
+}
+
 export type CameraBoxState = 'normal' | 'active' | 'alert'
 
 export interface CameraBox {

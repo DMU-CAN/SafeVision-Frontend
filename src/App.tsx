@@ -14,7 +14,7 @@ import { ZoneSettingsPage } from './pages/ZoneSettingsPage'
 import { FieldRobotPage } from './pages/FieldRobotPage'
 import './App.css'
 import { api, getStoredUser, isAuthenticated, UNAUTHORIZED_EVENT } from './api/client'
-import type { Camera, Robot, SafetyEventRaw, Zone, ZonePoint } from './types'
+import type { Camera, ControlProtocol, Equipment, Robot, SafetyEventRaw, Zone, ZonePoint } from './types'
 import { ControlPanel } from './components/control/ControlPanel'
 import { closeAllConnections, closeConnection } from './hooks/webrtcManager'
 import { mapSafetyEvent } from './utils/events'
@@ -39,6 +39,9 @@ function App() {
   const [robots, setRobots] = useState<Robot[]>([])
   const [robotsLoading, setRobotsLoading] = useState(true)
   const [robotsError, setRobotsError] = useState<string | null>(null)
+  const [equipments, setEquipments] = useState<Equipment[]>([])
+  const [equipmentsLoading, setEquipmentsLoading] = useState(true)
+  const [equipmentsError, setEquipmentsError] = useState<string | null>(null)
   const [safetyEvents, setSafetyEvents] = useState<SafetyEventRaw[]>([])
   const [eventsLoading, setEventsLoading] = useState(true)
   const [eventsError, setEventsError] = useState<string | null>(null)
@@ -75,6 +78,15 @@ function App() {
       .finally(() => setRobotsLoading(false))
   }, [])
 
+  const loadEquipments = useCallback(() => {
+    setEquipmentsLoading(true)
+    setEquipmentsError(null)
+    return api.get<{ items: Equipment[] }>('/equipments')
+      .then((data) => setEquipments(data.items))
+      .catch(() => setEquipmentsError('설비 목록을 불러오지 못했습니다.'))
+      .finally(() => setEquipmentsLoading(false))
+  }, [])
+
   const loadEvents = useCallback((showLoading: boolean) => {
     if (showLoading) setEventsLoading(true)
     setEventsError(null)
@@ -103,7 +115,8 @@ function App() {
     if (!authed) return
     loadCameras()
     loadRobots()
-  }, [authed, loadCameras, loadRobots])
+    loadEquipments()
+  }, [authed, loadCameras, loadRobots, loadEquipments])
 
   useEffect(() => {
     if (!authed) return
@@ -134,6 +147,17 @@ function App() {
   const handleRegisterRobot = async (payload: { name: string; controlAddress: string; cameraRtspUrl: string; locationX?: number; locationY?: number }) => {
     await api.post('/robots', payload)
     await loadRobots()
+  }
+
+  const handleRegisterEquipment = async (payload: { name: string; controlProtocol: ControlProtocol; controlAddress: string }) => {
+    await api.post('/equipments', payload)
+    await loadEquipments()
+  }
+
+  const handleDeleteEquipment = (equipmentId: number) => {
+    api.delete(`/equipments/${equipmentId}`)
+      .then(() => loadEquipments())
+      .catch(() => setEquipmentsError('설비 삭제에 실패했습니다.'))
   }
 
   const handleSaveZone = (name: string) => {
@@ -224,6 +248,11 @@ function App() {
           robotsError={robotsError}
           onRegisterRobot={handleRegisterRobot}
           onDeleteRobot={handleDeleteRobot}
+          equipments={equipments}
+          equipmentsLoading={equipmentsLoading}
+          equipmentsError={equipmentsError}
+          onRegisterEquipment={handleRegisterEquipment}
+          onDeleteEquipment={handleDeleteEquipment}
         />
       ) : isZoneSettingsPage ? (
         <ZoneSettingsPage

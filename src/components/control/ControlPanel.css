@@ -1,4 +1,81 @@
-.control-panel { display: flex; gap: 12px; padding: 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; }
-.control-panel__section { flex: 1; min-width: 0; }.control-panel h3 { margin: 0 0 8px; color: var(--text-header); font-size: 13px; }
-.control-panel__actions { display: flex; gap: 6px; align-items: center; }
-.control-panel button { height: 28px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text-main); font-size: 11px; padding: 0 8px; cursor: pointer; }.control-panel .danger { color: var(--danger-red); border-color: var(--danger-red); }
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  min-height: 140px;
+}
+
+.control-panel h3 {
+  margin: 0;
+  color: var(--text-header);
+  font-size: 16px;
+}
+
+.control-panel__hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.control-panel__equipment-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.control-panel__equipment {
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--btn-bg);
+  color: var(--text-main);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.control-panel__equipment--active {
+  background: var(--accent-blue);
+  color: var(--text-header);
+  font-weight: bold;
+  border-color: var(--accent-blue);
+}
+
+.control-panel__actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.control-panel button {
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-main);
+  font-size: 14px;
+  font-weight: bold;
+  padding: 0 24px;
+  cursor: pointer;
+}
+
+.control-panel__actions button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.control-panel .danger {
+  color: var(--text-header);
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.control-panel__status {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import type { Camera, Robot } from '../types'
+import type { Camera, ControlProtocol, Equipment, Robot } from '../types'
 import './EquipmentManagementPage.css'
 
 interface EquipmentManagementPageProps {
@@ -13,6 +13,11 @@ interface EquipmentManagementPageProps {
   robotsError?: string | null
   onRegisterRobot: (payload: { name: string; controlAddress: string; cameraRtspUrl: string; locationX?: number; locationY?: number }) => Promise<void>
   onDeleteRobot: (robotId: number) => void
+  equipments: Equipment[]
+  equipmentsLoading?: boolean
+  equipmentsError?: string | null
+  onRegisterEquipment: (payload: { name: string; controlProtocol: ControlProtocol; controlAddress: string }) => Promise<void>
+  onDeleteEquipment: (equipmentId: number) => void
 }
 
 const cameraStatusLabel: Record<Camera['status'], string> = {
@@ -21,10 +26,12 @@ const cameraStatusLabel: Record<Camera['status'], string> = {
 
 const emptyCameraForm = { name: '', rtspUrl: '', location: '', locationX: '', locationY: '' }
 const emptyRobotForm = { name: '', controlAddress: '', cameraRtspUrl: '', locationX: '', locationY: '' }
+const emptyEquipmentForm: { name: string; controlProtocol: ControlProtocol; controlAddress: string } = { name: '', controlProtocol: 'SERIAL', controlAddress: '' }
 
 export function EquipmentManagementPage({
   cameras, camerasLoading, camerasError, onRegisterCamera, onDeleteCamera,
   robots, robotsLoading, robotsError, onRegisterRobot, onDeleteRobot,
+  equipments, equipmentsLoading, equipmentsError, onRegisterEquipment, onDeleteEquipment,
 }: EquipmentManagementPageProps) {
   const [cameraForm, setCameraForm] = useState(emptyCameraForm)
   const [cameraFormError, setCameraFormError] = useState<string | null>(null)
@@ -33,6 +40,10 @@ export function EquipmentManagementPage({
   const [robotForm, setRobotForm] = useState(emptyRobotForm)
   const [robotFormError, setRobotFormError] = useState<string | null>(null)
   const [registeringRobot, setRegisteringRobot] = useState(false)
+
+  const [equipmentForm, setEquipmentForm] = useState(emptyEquipmentForm)
+  const [equipmentFormError, setEquipmentFormError] = useState<string | null>(null)
+  const [registeringEquipment, setRegisteringEquipment] = useState(false)
 
   const handleCameraSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -74,10 +85,72 @@ export function EquipmentManagementPage({
     }
   }
 
+  const handleEquipmentSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    setEquipmentFormError(null)
+    setRegisteringEquipment(true)
+    try {
+      await onRegisterEquipment(equipmentForm)
+      setEquipmentForm(emptyEquipmentForm)
+    } catch {
+      setEquipmentFormError('설비 등록에 실패했습니다.')
+    } finally {
+      setRegisteringEquipment(false)
+    }
+  }
+
   return (
     <main className="equipment-management">
       <span className="equipment-management__eyebrow">SAFE-VISION CONTROL CENTER</span>
       <h1>장비 관리</h1>
+
+      <section className="equipment-management__panel">
+        <h2>새 설비 등록</h2>
+        <form className="equipment-management__form" onSubmit={handleEquipmentSubmit}>
+          <label><span>이름</span><input value={equipmentForm.name} onChange={(event) => setEquipmentForm({ ...equipmentForm, name: event.target.value })} required /></label>
+          <label>
+            <span>제어 방식</span>
+            <select value={equipmentForm.controlProtocol} onChange={(event) => setEquipmentForm({ ...equipmentForm, controlProtocol: event.target.value as ControlProtocol })}>
+              <option value="SERIAL">SERIAL (시리얼 포트)</option>
+              <option value="NETWORK">NETWORK (host:port)</option>
+            </select>
+          </label>
+          <label>
+            <span>제어 주소</span>
+            <input
+              value={equipmentForm.controlAddress}
+              onChange={(event) => setEquipmentForm({ ...equipmentForm, controlAddress: event.target.value })}
+              placeholder={equipmentForm.controlProtocol === 'SERIAL' ? '/dev/ttyACM0' : '192.168.0.60:8082'}
+              required
+            />
+          </label>
+          <button type="submit" disabled={registeringEquipment}>{registeringEquipment ? '등록 중...' : '설비 등록'}</button>
+        </form>
+        {equipmentFormError && <p className="equipment-management__error">{equipmentFormError}</p>}
+      </section>
+
+      <section className="equipment-management__panel">
+        <h2>등록된 설비 ({equipments.length})</h2>
+        {equipmentsLoading && <p className="equipment-management__hint">불러오는 중...</p>}
+        {!equipmentsLoading && equipmentsError && <p className="equipment-management__error">{equipmentsError}</p>}
+        {!equipmentsLoading && !equipmentsError && equipments.length === 0 && <p className="equipment-management__hint">등록된 설비가 없습니다.</p>}
+        {!equipmentsLoading && !equipmentsError && (
+          <table className="equipment-management__table">
+            <thead><tr><th>ID</th><th>이름</th><th>제어 방식</th><th>제어 주소</th><th></th></tr></thead>
+            <tbody>
+              {equipments.map((equipment) => (
+                <tr key={equipment.id}>
+                  <td>EQ-{String(equipment.id).padStart(2, '0')}</td>
+                  <td>{equipment.name}</td>
+                  <td>{equipment.controlProtocol}</td>
+                  <td className="equipment-management__url">{equipment.controlAddress}</td>
+                  <td><button type="button" className="equipment-management__delete" onClick={() => onDeleteEquipment(equipment.id)}>삭제</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
 
       <section className="equipment-management__panel">
         <h2>새 카메라 등록</h2>
