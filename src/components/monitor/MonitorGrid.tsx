@@ -1,19 +1,12 @@
-import { useState } from 'react'
+import { useRef, useState, type MouseEvent } from 'react'
 import { layoutOptions } from '../../data/mockData'
 import type { Camera, SafetyEventRaw, Zone, ZonePoint } from '../../types'
 import { API_BASE_URL } from '../../api/client'
 import { CameraGridBox } from './CameraGridBox'
 import './MonitorGrid.css'
 
-const DAY_SCALE_LABELS = ['00:00', '06:00', '12:00', '18:00', '24:00']
-
-function minutesSinceMidnight(date: Date): number {
-  return date.getHours() * 60 + date.getMinutes() + date.getSeconds() / 60
-}
-
-function isToday(date: Date, now: Date): boolean {
-  return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate()
-}
+const WINDOW_MINUTES = 30
+const SCALE_LABELS = ['30분 전', '20분 전', '10분 전', '실시간']
 
 interface MonitorGridProps {
   cameras: Camera[]
@@ -29,9 +22,25 @@ interface MonitorGridProps {
 export function MonitorGrid({ cameras, selectedCameraId, zones, zoneEditing, zoneDraftPoints, onZonePointAdd, events, onPlayClip }: MonitorGridProps) {
   const [layout, setLayout] = useState('3x3')
   const [timeshiftMinutesAgo, setTimeshiftMinutesAgo] = useState(0)
+  const trackRef = useRef<HTMLDivElement>(null)
   const now = new Date()
-  const nowPercent = (minutesSinceMidnight(now) / 1440) * 100
-  const todaysEvents = (events ?? []).filter((event) => event.cameraId === selectedCameraId && isToday(new Date(event.createdAt), now))
+
+  const recentEvents = (events ?? []).filter((event) => {
+    if (event.cameraId !== selectedCameraId) return false
+    const ageMinutes = (now.getTime() - new Date(event.createdAt).getTime()) / 60000
+    return ageMinutes >= 0 && ageMinutes <= WINDOW_MINUTES
+  })
+
+  const percentForMinutesAgo = (minutesAgo: number) => ((WINDOW_MINUTES - minutesAgo) / WINDOW_MINUTES) * 100
+
+  const handleTrackClick = (event: MouseEvent<HTMLDivElement>) => {
+    const track = trackRef.current
+    if (!track) return
+    const rect = track.getBoundingClientRect()
+    const percent = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width))
+    const minutesAgo = Math.round(WINDOW_MINUTES * (1 - percent))
+    setTimeshiftMinutesAgo(minutesAgo)
+  }
 
   return <section className="monitor-grid">
     <div className={`camera-grid camera-grid--${layout.replace('x', '-')}`}>
@@ -53,43 +62,37 @@ export function MonitorGrid({ cameras, selectedCameraId, zones, zoneEditing, zon
     <div className="layout-switcher"><span className="layout-switcher__label">화면 분할:</span>
       {layoutOptions.map((option) => <button key={option} type="button" className={option === layout ? 'layout-switcher__btn layout-switcher__btn--active' : 'layout-switcher__btn'} onClick={() => setLayout(option)}>{option}</button>)}
     </div>
-    <div className="timeshift-control">
-      <span className="timeshift-control__label">{timeshiftMinutesAgo === 0 ? '● 실시간' : `${timeshiftMinutesAgo}분 전`}</span>
-      <input
-        type="range"
-        min={0}
-        max={30}
-        step={1}
-        value={timeshiftMinutesAgo}
-        onChange={(event) => setTimeshiftMinutesAgo(Number(event.target.value))}
-      />
-      <span className="timeshift-control__scale-label">30분 전</span>
-      {timeshiftMinutesAgo > 0 && (
-        <button type="button" className="timeshift-control__live-btn" onClick={() => setTimeshiftMinutesAgo(0)}>라이브로</button>
-      )}
-    </div>
     <div className="timeline-panel">
+      <span className={timeshiftMinutesAgo === 0 ? 'timeline-panel__status timeline-panel__status--live' : 'timeline-panel__status'}>
+        {timeshiftMinutesAgo === 0 ? '● 실시간' : `${timeshiftMinutesAgo}분 전`}
+      </span>
       <div className="timeline-bar">
-        <div className="timeline-bar__track">
-          <div className="timeline-bar__playhead" style={{ left: `${nowPercent}%` }} title={`현재 ${now.toLocaleTimeString()}`} />
-          {todaysEvents.map((event) => {
+        <div className="timeline-bar__track" ref={trackRef} onClick={handleTrackClick}>
+          <div className="timeline-bar__playhead" style={{ left: `${percentForMinutesAgo(timeshiftMinutesAgo)}%` }} />
+          {recentEvents.map((event) => {
             const clipUrl = `${API_BASE_URL}/safety-events/${event.id}/clip`
-            const percent = (minutesSinceMidnight(new Date(event.createdAt)) / 1440) * 100
+            const ageMinutes = (now.getTime() - new Date(event.createdAt).getTime()) / 60000
             return (
               <button
                 type="button"
                 key={event.id}
                 className="timeline-bar__event-marker"
-                style={{ left: `${percent}%` }}
+                style={{ left: `${percentForMinutesAgo(ageMinutes)}%` }}
                 title={`${event.eventType} ${new Date(event.createdAt).toLocaleTimeString()}`}
-                onClick={() => event.clipPath && onPlayClip?.(clipUrl)}
+                onClick={(clickEvent) => {
+                  clickEvent.stopPropagation()
+                  if (event.clipPath) onPlayClip?.(clipUrl)
+                }}
                 disabled={!event.clipPath}
               />
             )
           })}
         </div>
-        <div className="timeline-bar__scale">{DAY_SCALE_LABELS.map((label) => <span key={label}>{label}</span>)}</div>
+        <div className="timeline-bar__scale">{SCALE_LABELS.map((label) => <span key={label}>{label}</span>)}</div>
       </div>
+      {timeshiftMinutesAgo > 0 && (
+        <button type="button" className="timeline-panel__live-btn" onClick={() => setTimeshiftMinutesAgo(0)}>라이브로</button>
+      )}
     </div>
   </section>
 }
