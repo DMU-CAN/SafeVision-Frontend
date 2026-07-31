@@ -25,6 +25,8 @@ import { useEquipments } from './hooks/useEquipments'
 import { useSafetyEvents } from './hooks/useSafetyEvents'
 import { useZones } from './hooks/useZones'
 
+const ZONES_REFRESH_INTERVAL_MS = 15000
+
 function App() {
   const now = useClock()
   const [authed, setAuthed] = useState(isAuthenticated)
@@ -58,6 +60,12 @@ function App() {
     setZoneDraftPoints([])
     loadZones(selectedCameraId)
   }, [authed, selectedCameraId, loadZones])
+
+  useEffect(() => {
+    if (!authed || !selectedCameraId || zoneEditing) return
+    const interval = setInterval(() => loadZones(selectedCameraId), ZONES_REFRESH_INTERVAL_MS)
+    return () => clearInterval(interval)
+  }, [authed, selectedCameraId, zoneEditing, loadZones])
 
   if (!authed) {
     return <LoginPage onSuccess={() => setAuthed(true)} />
