@@ -25,7 +25,7 @@ import { useEquipments } from './hooks/useEquipments'
 import { useSafetyEvents } from './hooks/useSafetyEvents'
 import { useZones } from './hooks/useZones'
 
-const ZONES_REFRESH_INTERVAL_MS = 15000
+const ZONES_REFRESH_INTERVAL_MS = 1000
 
 function App() {
   const now = useClock()
