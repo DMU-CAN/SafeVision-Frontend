@@ -286,3 +286,74 @@
   grid-area: stop;
   color: var(--danger-red);
 }
+
+.field-robot__drive-control {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.field-robot__drive-joystick {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  flex: 0 0 132px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, rgba(59, 130, 246, 0.18), transparent 34%),
+    var(--btn-bg);
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+}
+
+.field-robot__drive-joystick:active {
+  cursor: grabbing;
+}
+
+.field-robot__drive-axis {
+  position: absolute;
+  background: rgba(148, 163, 184, 0.32);
+  pointer-events: none;
+}
+
+.field-robot__drive-axis--vertical {
+  top: 16px;
+  bottom: 16px;
+  left: 50%;
+  width: 1px;
+}
+
+.field-robot__drive-axis--horizontal {
+  top: 50%;
+  left: 16px;
+  right: 16px;
+  height: 1px;
+}
+
+.field-robot__drive-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(96, 165, 250, 0.8);
+  border-radius: 50%;
+  background: var(--accent-blue);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+}
+
+.field-robot__drive-state {
+  min-width: 54px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--panel-header);
+  color: var(--text-main);
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+}

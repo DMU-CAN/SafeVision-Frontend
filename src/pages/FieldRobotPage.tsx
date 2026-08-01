@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
 import { api } from '../api/client'
 import type { Camera, MoveDirection, PtzDirection, Robot, RobotDispatch, SafetyEventRaw } from '../types'
 import { eventTitle } from '../utils/events'
@@ -20,19 +20,24 @@ const PTZ_BUTTONS: { direction: PtzDirection; label: string }[] = [
   { direction: 'down', label: '▼' },
 ]
 
-const MOVE_BUTTONS: { direction: MoveDirection; label: string }[] = [
-  { direction: 'forward', label: '▲' },
-  { direction: 'left', label: '◀' },
-  { direction: 'stop', label: '■' },
-  { direction: 'right', label: '▶' },
-  { direction: 'backward', label: '▼' },
-]
+const JOYSTICK_RADIUS = 54
+const JOYSTICK_DEADZONE = 16
+const MOVE_DIRECTION_LABELS: Record<MoveDirection, string> = {
+  forward: '전진',
+  backward: '후진',
+  left: '좌회전',
+  right: '우회전',
+  stop: '정지',
+}
 
 export function FieldRobotPage({ robots, robotsLoading, cameras, events }: FieldRobotPageProps) {
   const [selectedRobotId, setSelectedRobotId] = useState<number | null>(null)
   const [dispatches, setDispatches] = useState<RobotDispatch[]>([])
   const [ptzStatus, setPtzStatus] = useState<string | null>(null)
   const [emergencyStatus, setEmergencyStatus] = useState<string | null>(null)
+  const [joystickPosition, setJoystickPosition] = useState({ x: 0, y: 0 })
+  const [moveDirection, setMoveDirection] = useState<MoveDirection>('stop')
+  const lastMoveDirection = useRef<MoveDirection>('stop')
 
   useEffect(() => {
     const dispatchedRobot = robots.find((robot) => robot.status === 'DISPATCHED')
@@ -82,6 +87,49 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
     api.post<{ sent: boolean }>(`/robots/${selectedRobot.id}/move`, { direction })
       .then((result) => setPtzStatus(result.sent ? null : '로봇에 주행 명령이 전달되지 않았습니다.'))
       .catch(() => setPtzStatus('로봇 주행 명령 전송에 실패했습니다.'))
+  }
+
+  const directionFromVector = (x: number, y: number): MoveDirection => {
+    if (Math.hypot(x, y) < JOYSTICK_DEADZONE) return 'stop'
+    if (Math.abs(y) >= Math.abs(x)) return y < 0 ? 'forward' : 'backward'
+    return x < 0 ? 'left' : 'right'
+  }
+
+  const updateJoystick = (event: PointerEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const centerX = rect.left + rect.width / 2
+    const centerY = rect.top + rect.height / 2
+    const rawX = event.clientX - centerX
+    const rawY = event.clientY - centerY
+    const distance = Math.hypot(rawX, rawY)
+    const scale = distance > JOYSTICK_RADIUS ? JOYSTICK_RADIUS / distance : 1
+    const x = rawX * scale
+    const y = rawY * scale
+    const nextDirection = directionFromVector(x, y)
+
+    setJoystickPosition({ x, y })
+    setMoveDirection(nextDirection)
+    if (nextDirection !== lastMoveDirection.current) {
+      lastMoveDirection.current = nextDirection
+      sendMove(nextDirection)
+    }
+  }
+
+  const startJoystick = (event: PointerEvent<HTMLDivElement>) => {
+    event.currentTarget.setPointerCapture(event.pointerId)
+    updateJoystick(event)
+  }
+
+  const stopJoystick = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+    setJoystickPosition({ x: 0, y: 0 })
+    setMoveDirection('stop')
+    if (lastMoveDirection.current !== 'stop') {
+      lastMoveDirection.current = 'stop'
+      sendMove('stop')
+    }
   }
 
   const returnRobot = () => {
@@ -182,12 +230,24 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
 
               <div className="field-robot__control">
                 <h3>로봇 수동 제어</h3>
-                <div className="field-robot__joystick">
-                  {MOVE_BUTTONS.map((button) => (
-                    <button key={button.direction} type="button" className={`field-robot__joystick-btn field-robot__joystick-btn--${button.direction}`} onClick={() => sendMove(button.direction)}>
-                      {button.label}
-                    </button>
-                  ))}
+                <div className="field-robot__drive-control">
+                  <div
+                    className="field-robot__drive-joystick"
+                    role="application"
+                    aria-label="로봇 수동 조이스틱"
+                    onPointerDown={startJoystick}
+                    onPointerMove={(event) => event.currentTarget.hasPointerCapture(event.pointerId) && updateJoystick(event)}
+                    onPointerUp={stopJoystick}
+                    onPointerCancel={stopJoystick}
+                  >
+                    <span className="field-robot__drive-axis field-robot__drive-axis--vertical" />
+                    <span className="field-robot__drive-axis field-robot__drive-axis--horizontal" />
+                    <span
+                      className="field-robot__drive-knob"
+                      style={{ transform: `translate(calc(-50% + ${joystickPosition.x}px), calc(-50% + ${joystickPosition.y}px))` }}
+                    />
+                  </div>
+                  <span className="field-robot__drive-state">{MOVE_DIRECTION_LABELS[moveDirection]}</span>
                 </div>
               </div>
             </div>
