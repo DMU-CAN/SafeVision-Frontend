@@ -9,6 +9,6 @@ export default defineConfig({
     // a DDNS domain depending on where the request comes from — Vite 6's
     // host-header check would otherwise reject all but whichever one was
     // listed literally.
-    allowedHosts: true,
+    allowedHosts: ['safevision.kro.kr'],
   },
 })
