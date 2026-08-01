@@ -50,7 +50,8 @@ export interface Robot {
   createdAt: string
 }
 
-export type PtzDirection = 'up' | 'down' | 'left' | 'right' | 'zoomIn' | 'zoomOut' | 'stop'
+export type PtzDirection = 'up' | 'down' | 'left' | 'right' | 'stop'
+export type MoveDirection = 'forward' | 'backward' | 'left' | 'right' | 'stop'
 
 export interface RobotDispatch {
   id: number

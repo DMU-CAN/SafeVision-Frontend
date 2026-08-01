@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api } from '../api/client'
-import type { Camera, PtzDirection, Robot, RobotDispatch, SafetyEventRaw } from '../types'
+import type { Camera, MoveDirection, PtzDirection, Robot, RobotDispatch, SafetyEventRaw } from '../types'
 import { eventTitle } from '../utils/events'
 import { CameraGridBox } from '../components/monitor/CameraGridBox'
 import './FieldRobotPage.css'
@@ -18,8 +18,14 @@ const PTZ_BUTTONS: { direction: PtzDirection; label: string }[] = [
   { direction: 'stop', label: '■' },
   { direction: 'right', label: '▶' },
   { direction: 'down', label: '▼' },
-  { direction: 'zoomIn', label: '줌 +' },
-  { direction: 'zoomOut', label: '줌 -' },
+]
+
+const MOVE_BUTTONS: { direction: MoveDirection; label: string }[] = [
+  { direction: 'forward', label: '▲' },
+  { direction: 'left', label: '◀' },
+  { direction: 'stop', label: '■' },
+  { direction: 'right', label: '▶' },
+  { direction: 'backward', label: '▼' },
 ]
 
 export function FieldRobotPage({ robots, robotsLoading, cameras, events }: FieldRobotPageProps) {
@@ -68,6 +74,14 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
       .then(() => api.get<RobotDispatch[]>(`/robots/${selectedRobot.id}/dispatches`))
       .then(setDispatches)
       .catch(() => undefined)
+  }
+
+  const sendMove = (direction: MoveDirection) => {
+    if (!selectedRobot) return
+    setPtzStatus(null)
+    api.post<{ sent: boolean }>(`/robots/${selectedRobot.id}/move`, { direction })
+      .then((result) => setPtzStatus(result.sent ? null : '로봇에 주행 명령이 전달되지 않았습니다.'))
+      .catch(() => setPtzStatus('로봇 주행 명령 전송에 실패했습니다.'))
   }
 
   const returnRobot = () => {
@@ -156,14 +170,25 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
 
               <div className="field-robot__control">
                 <h3>로봇 카메라 제어</h3>
-                <div className="field-robot__ptz">
+                <div className="field-robot__joystick">
                   {PTZ_BUTTONS.map((button) => (
-                    <button key={button.direction} type="button" className={`field-robot__ptz-btn field-robot__ptz-btn--${button.direction}`} onClick={() => sendPtz(button.direction)}>
+                    <button key={button.direction} type="button" className={`field-robot__joystick-btn field-robot__joystick-btn--${button.direction}`} onClick={() => sendPtz(button.direction)}>
                       {button.label}
                     </button>
                   ))}
                 </div>
                 {ptzStatus && <p className="field-robot__warning">{ptzStatus}</p>}
+              </div>
+
+              <div className="field-robot__control">
+                <h3>로봇 수동 제어</h3>
+                <div className="field-robot__joystick">
+                  {MOVE_BUTTONS.map((button) => (
+                    <button key={button.direction} type="button" className={`field-robot__joystick-btn field-robot__joystick-btn--${button.direction}`} onClick={() => sendMove(button.direction)}>
+                      {button.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
