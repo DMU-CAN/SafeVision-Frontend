@@ -40,6 +40,7 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
   const [moveDirection, setMoveDirection] = useState<MoveDirection>('stop')
   const lastPtzDirection = useRef<PtzDirection>('stop')
   const lastMoveDirection = useRef<MoveDirection>('stop')
+  const ptzRepeatTimer = useRef<number | null>(null)
 
   useEffect(() => {
     const dispatchedRobot = robots.find((robot) => robot.status === 'DISPATCHED')
@@ -54,6 +55,12 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
     if (selectedRobotId === null) return
     api.get<RobotDispatch[]>(`/robots/${selectedRobotId}/dispatches`).then(setDispatches).catch(() => setDispatches([]))
   }, [selectedRobotId, events])
+
+  useEffect(() => {
+    return () => {
+      if (ptzRepeatTimer.current !== null) window.clearInterval(ptzRepeatTimer.current)
+    }
+  }, [])
 
   const selectedRobot = robots.find((robot) => robot.id === selectedRobotId) ?? null
   const latestDispatch = dispatches[0] ?? null
@@ -73,6 +80,23 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
     api.post<{ sent: boolean }>(`/robots/${selectedRobot.id}/ptz`, { direction })
       .then((result) => setPtzStatus(result.sent ? null : '로봇에 명령이 전달되지 않았습니다.'))
       .catch(() => setPtzStatus('PTZ 명령 전송에 실패했습니다.'))
+  }
+
+  const stopPtzRepeat = () => {
+    if (ptzRepeatTimer.current !== null) {
+      window.clearInterval(ptzRepeatTimer.current)
+      ptzRepeatTimer.current = null
+    }
+  }
+
+  const startPtzRepeat = (direction: PtzDirection) => {
+    stopPtzRepeat()
+    if (direction === 'stop') {
+      sendPtz('stop')
+      return
+    }
+    sendPtz(direction)
+    ptzRepeatTimer.current = window.setInterval(() => sendPtz(direction), 180)
   }
 
   const dispatchRobot = () => {
@@ -124,7 +148,7 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
     setPtzDirection(nextDirection)
     if (nextDirection !== lastPtzDirection.current) {
       lastPtzDirection.current = nextDirection
-      sendPtz(nextDirection)
+      startPtzRepeat(nextDirection)
     }
   }
 
@@ -156,6 +180,7 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
     }
     setPtzPosition({ x: 0, y: 0 })
     setPtzDirection('stop')
+    stopPtzRepeat()
     if (lastPtzDirection.current !== 'stop') {
       lastPtzDirection.current = 'stop'
       sendPtz('stop')
