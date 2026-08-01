@@ -27,6 +27,7 @@ import { useZones } from './hooks/useZones'
 
 const ZONES_REFRESH_INTERVAL_MS = 1000
 const EVENT_HISTORY_WINDOW_MS = 24 * 60 * 60 * 1000
+const ROBOTS_REFRESH_INTERVAL_MS = 5000
 
 function App() {
   const now = useClock()
@@ -54,6 +55,12 @@ function App() {
     loadRobots()
     loadEquipments()
   }, [authed, loadCameras, loadRobots, loadEquipments])
+
+  useEffect(() => {
+    if (!authed) return
+    const interval = setInterval(loadRobots, ROBOTS_REFRESH_INTERVAL_MS)
+    return () => clearInterval(interval)
+  }, [authed, loadRobots])
 
   useEffect(() => {
     if (!authed) return

@@ -29,6 +29,11 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
   const [emergencyStatus, setEmergencyStatus] = useState<string | null>(null)
 
   useEffect(() => {
+    const dispatchedRobot = robots.find((robot) => robot.status === 'DISPATCHED')
+    if (dispatchedRobot && selectedRobotId !== dispatchedRobot.id) {
+      setSelectedRobotId(dispatchedRobot.id)
+      return
+    }
     if (selectedRobotId === null && robots.length > 0) setSelectedRobotId(robots[0].id)
   }, [robots, selectedRobotId])
 
