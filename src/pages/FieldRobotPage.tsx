@@ -44,9 +44,10 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
 
   const selectedRobot = robots.find((robot) => robot.id === selectedRobotId) ?? null
   const latestDispatch = dispatches[0] ?? null
+  const isDispatched = selectedRobot?.status === 'DISPATCHED'
   const reasonEvent = useMemo(
-    () => (latestDispatch?.safetyEventId ? events.find((event) => event.id === latestDispatch.safetyEventId) : undefined),
-    [latestDispatch, events],
+    () => (isDispatched && latestDispatch?.safetyEventId ? events.find((event) => event.id === latestDispatch.safetyEventId) : undefined),
+    [isDispatched, latestDispatch, events],
   )
   const reasonCamera = useMemo(
     () => (reasonEvent?.cameraId != null ? cameras.find((camera) => camera.id === reasonEvent.cameraId) : undefined),
@@ -67,6 +68,14 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
       .then(() => api.get<RobotDispatch[]>(`/robots/${selectedRobot.id}/dispatches`))
       .then(setDispatches)
       .catch(() => undefined)
+  }
+
+  const returnRobot = () => {
+    if (!selectedRobot) return
+    api.post(`/robots/${selectedRobot.id}/return`, {})
+      .then(() => api.get<RobotDispatch[]>(`/robots/${selectedRobot.id}/dispatches`))
+      .then(setDispatches)
+      .catch(() => setPtzStatus('로봇 복귀 명령 전송에 실패했습니다.'))
   }
 
   const callEmergency = (kind: 'contact' | 'share') => {
@@ -126,7 +135,10 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
 
             <div className="field-robot__info">
               <h2>출동 정보</h2>
-              <button type="button" className="field-robot__dispatch-btn" onClick={dispatchRobot}>이 로봇 출동</button>
+              <div className="field-robot__dispatch-actions">
+                <button type="button" className="field-robot__dispatch-btn" onClick={dispatchRobot}>이 로봇 출동</button>
+                <button type="button" className="field-robot__return-btn" onClick={returnRobot} disabled={selectedRobot.status === 'IDLE'}>로봇 복귀</button>
+              </div>
               {!latestDispatch && <p className="field-robot__hint">출동 이력이 없습니다.</p>}
               {latestDispatch && (
                 <div className="field-robot__dispatch">
