@@ -34,6 +34,7 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
   const [dispatches, setDispatches] = useState<RobotDispatch[]>([])
   const [ptzStatus, setPtzStatus] = useState<string | null>(null)
   const [emergencyStatus, setEmergencyStatus] = useState<string | null>(null)
+  const [routeStatus, setRouteStatus] = useState<string | null>(null)
   const [ptzPosition, setPtzPosition] = useState({ x: 0, y: 0 })
   const [ptzDirection, setPtzDirection] = useState<PtzDirection>('stop')
   const [joystickPosition, setJoystickPosition] = useState({ x: 0, y: 0 })
@@ -105,6 +106,20 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
       .then(() => api.get<RobotDispatch[]>(`/robots/${selectedRobot.id}/dispatches`))
       .then(setDispatches)
       .catch(() => undefined)
+  }
+
+  const sendRouteCommand = (action: 'start' | 'save' | 'clear' | 'play') => {
+    if (!selectedRobot) return
+    const messages = {
+      start: '이동 경로 녹화를 시작했습니다.',
+      save: '이동 경로를 저장했습니다.',
+      clear: '저장된 이동 경로를 삭제했습니다.',
+      play: '저장된 이동 경로 재생을 시작했습니다.',
+    }
+    setRouteStatus(null)
+    api.post<{ sent: boolean }>(`/robots/${selectedRobot.id}/route-record/${action}`, {})
+      .then((result) => setRouteStatus(result.sent ? messages[action] : '로봇에 경로 명령이 전달되지 않았습니다.'))
+      .catch(() => setRouteStatus('경로 명령 전송에 실패했습니다.'))
   }
 
   const sendMove = (direction: MoveDirection) => {
@@ -282,6 +297,14 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
                 <button type="button" className="field-robot__emergency-btn" onClick={() => callEmergency('share')}>현장 상황 공유</button>
               </div>
               {emergencyStatus && <p className="field-robot__hint">{emergencyStatus}</p>}
+
+              <div className="field-robot__route-actions">
+                <button type="button" onClick={() => sendRouteCommand('start')}>경로 녹화 시작</button>
+                <button type="button" onClick={() => sendRouteCommand('save')}>현재 경로 저장</button>
+                <button type="button" onClick={() => sendRouteCommand('play')}>저장 경로 재생</button>
+                <button type="button" onClick={() => sendRouteCommand('clear')}>경로 삭제</button>
+              </div>
+              {routeStatus && <p className="field-robot__hint">{routeStatus}</p>}
 
               <div className="field-robot__control-row">
                 <div className="field-robot__control">
