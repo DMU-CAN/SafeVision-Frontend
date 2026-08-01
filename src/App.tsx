@@ -26,6 +26,7 @@ import { useSafetyEvents } from './hooks/useSafetyEvents'
 import { useZones } from './hooks/useZones'
 
 const ZONES_REFRESH_INTERVAL_MS = 1000
+const EVENT_HISTORY_WINDOW_MS = 24 * 60 * 60 * 1000
 
 function App() {
   const now = useClock()
@@ -101,7 +102,11 @@ function App() {
       })
   }
 
-  const mappedEvents = safetyEvents.map((event) => mapSafetyEvent(event, cameras))
+  const recentSafetyEvents = safetyEvents.filter((event) => {
+    const createdAt = new Date(event.createdAt).getTime()
+    return Number.isFinite(createdAt) && Date.now() - createdAt <= EVENT_HISTORY_WINDOW_MS
+  })
+  const mappedEvents = recentSafetyEvents.map((event) => mapSafetyEvent(event, cameras))
 
   const isMonitorPage = activeTab === navTabs[0]
   const isEquipmentManagementPage = activeTab === navTabs[1]
@@ -134,7 +139,7 @@ function App() {
               cameras={cameras}
               selectedCameraId={selectedCameraId}
               zones={zones}
-              events={safetyEvents}
+              events={recentSafetyEvents}
               onPlayClip={setActiveClipUrl}
             />
             <EventSidebar events={mappedEvents} loading={eventsLoading} error={eventsError} onPlayClip={setActiveClipUrl} />

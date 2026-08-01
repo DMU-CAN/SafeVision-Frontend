@@ -18,12 +18,13 @@ export function mapSafetyEvent(event: SafetyEventRaw, cameras: Camera[]): Safety
   const camera = cameras.find((item) => item.id === event.cameraId)
   const severity = eventSeverity(event.eventLevel)
   const title = eventTitle(event.eventType)
+  const detectedAt = new Date(event.createdAt)
   return {
     id: String(event.id),
     severity,
     title,
     description: `${camera?.name ?? '알 수 없는 카메라'}에서 ${title} 이벤트가 감지되었습니다.`,
-    meta: new Date(event.createdAt).toLocaleTimeString(),
+    meta: detectedAt.toLocaleString(),
     actionLabel: severity === 'danger' ? '확인' : '상세',
     clipUrl: event.clipPath ? withAccessToken(`${API_BASE_URL}/safety-events/${event.id}/clip`) : undefined,
   }
