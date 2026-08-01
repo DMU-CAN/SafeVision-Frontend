@@ -107,14 +107,6 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
                 <div className="field-robot__video">
                   <CameraGridBox box={{ id: `robot-${selectedRobot.id}`, label: selectedRobot.name, state: 'normal' }} robotId={selectedRobot.id} />
                 </div>
-                <div className="field-robot__ptz">
-                  {PTZ_BUTTONS.map((button) => (
-                    <button key={button.direction} type="button" className={`field-robot__ptz-btn field-robot__ptz-btn--${button.direction}`} onClick={() => sendPtz(button.direction)}>
-                      {button.label}
-                    </button>
-                  ))}
-                </div>
-                {ptzStatus && <p className="field-robot__warning">{ptzStatus}</p>}
               </div>
 
               <div className="field-robot__camera-block">
@@ -146,6 +138,18 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
                 <button type="button" className="field-robot__emergency-btn" onClick={() => callEmergency('share')}>현장 상황 공유</button>
               </div>
               {emergencyStatus && <p className="field-robot__hint">{emergencyStatus}</p>}
+
+              <div className="field-robot__control">
+                <h3>로봇 카메라 제어</h3>
+                <div className="field-robot__ptz">
+                  {PTZ_BUTTONS.map((button) => (
+                    <button key={button.direction} type="button" className={`field-robot__ptz-btn field-robot__ptz-btn--${button.direction}`} onClick={() => sendPtz(button.direction)}>
+                      {button.label}
+                    </button>
+                  ))}
+                </div>
+                {ptzStatus && <p className="field-robot__warning">{ptzStatus}</p>}
+              </div>
             </div>
           </section>
         )}
