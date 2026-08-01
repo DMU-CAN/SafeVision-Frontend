@@ -134,7 +134,7 @@
   grid-template-columns: repeat(4, 44px);
   grid-template-areas:
     ".    up    .     zoomIn"
-    "left stop  right zoomIn"
+    "left stop  right ."
     ".    down  .     zoomOut";
   gap: 6px;
   margin-top: 8px;
@@ -155,7 +155,7 @@
 .field-robot__ptz-btn--left { grid-area: left; }
 .field-robot__ptz-btn--right { grid-area: right; }
 .field-robot__ptz-btn--stop { grid-area: stop; color: var(--danger-red); }
-.field-robot__ptz-btn--zoomIn { grid-area: zoomIn; height: auto; }
+.field-robot__ptz-btn--zoomIn { grid-area: zoomIn; }
 .field-robot__ptz-btn--zoomOut { grid-area: zoomOut; }
 
 .field-robot__warning {
