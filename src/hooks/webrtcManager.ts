@@ -47,10 +47,14 @@ async function connect(target: StreamTarget, conn: Connection) {
   conn.pc.addTransceiver('video', { direction: 'recvonly' })
   conn.pc.ontrack = (event) => {
     conn.stream = event.streams[0] ?? null
+    if (conn.stream) conn.status = 'connected'
     notify(conn)
   }
   conn.pc.oniceconnectionstatechange = () => {
-    if (conn.pc.iceConnectionState === 'failed' || conn.pc.iceConnectionState === 'disconnected') {
+    if (conn.pc.iceConnectionState === 'connected' || conn.pc.iceConnectionState === 'completed') {
+      conn.status = 'connected'
+      notify(conn)
+    } else if (conn.pc.iceConnectionState === 'failed') {
       conn.status = 'error'
       notify(conn)
     }
