@@ -35,7 +35,7 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
   useEffect(() => {
     if (selectedRobotId === null) return
     api.get<RobotDispatch[]>(`/robots/${selectedRobotId}/dispatches`).then(setDispatches).catch(() => setDispatches([]))
-  }, [selectedRobotId])
+  }, [selectedRobotId, events])
 
   const selectedRobot = robots.find((robot) => robot.id === selectedRobotId) ?? null
   const latestDispatch = dispatches[0] ?? null
@@ -101,7 +101,7 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
 
         {selectedRobot && (
           <section className="field-robot__stage">
-            <div className="field-robot__cameras">
+            <div className={reasonCamera ? 'field-robot__cameras field-robot__cameras--incident' : 'field-robot__cameras'}>
               <div className="field-robot__camera-block">
                 <h2>로봇 카메라</h2>
                 <div className="field-robot__video">
@@ -109,16 +109,14 @@ export function FieldRobotPage({ robots, robotsLoading, cameras, events }: Field
                 </div>
               </div>
 
-              <div className="field-robot__camera-block">
-                <h2>사고 현장 CCTV{reasonCamera ? ` (CAM-${String(reasonCamera.id).padStart(2, '0')})` : ''}</h2>
-                <div className="field-robot__video">
-                  {reasonCamera ? (
+              {reasonCamera && (
+                <div className="field-robot__camera-block">
+                  <h2>사고 현장 CCTV (CAM-{String(reasonCamera.id).padStart(2, '0')})</h2>
+                  <div className="field-robot__video">
                     <CameraGridBox box={{ id: String(reasonCamera.id), label: reasonCamera.name, state: 'normal' }} yoloEnabled={false} />
-                  ) : (
-                    <div className="field-robot__video-empty">연결된 이벤트의 카메라 정보가 없습니다.</div>
-                  )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="field-robot__info">
